@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -29,6 +29,7 @@ namespace FFmpegStudio
         private Window? _window;
 
         public Window? Window => _window;
+        public static Window MainWindow => (Current as App)?._window ?? throw new InvalidOperationException("Main window not initialized");
 
         /// <summary>
         /// Initializes the singleton application object.  This is the first line of authored code
