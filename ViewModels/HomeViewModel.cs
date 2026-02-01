@@ -1,5 +1,11 @@
+using System;
 using System.Collections.ObjectModel;
+using System.Collections.Generic;
+using System.Linq;
+using System.Diagnostics;
+using System.Threading.Tasks;
 using FFmpegStudio.Models;
+using FFmpegStudio.Services;
 
 namespace FFmpegStudio.ViewModels
 {
@@ -8,6 +14,8 @@ namespace FFmpegStudio.ViewModels
         private FFmpegVersionInfo _ffmpegVersion = new();
         private HardwareInfo _hardwareInfo = new();
         private bool _isLoading;
+        private bool _isCodecsLoading;
+        private string _codecsErrorMessage = string.Empty;
 
         public FFmpegVersionInfo FFmpegVersion
         {
@@ -27,49 +35,389 @@ namespace FFmpegStudio.ViewModels
             set => SetProperty(ref _isLoading, value);
         }
 
-        public ObservableCollection<CodecInfo> Codecs { get; } = new();
+        public bool IsCodecsLoading
+        {
+            get => _isCodecsLoading;
+            set => SetProperty(ref _isCodecsLoading, value);
+        }
+
+        public string CodecsErrorMessage
+        {
+            get => _codecsErrorMessage;
+            set => SetProperty(ref _codecsErrorMessage, value);
+        }
+
+        public ObservableCollection<CodecInfo> VideoCodecs { get; } = new();
+        public ObservableCollection<CodecInfo> AudioCodecs { get; } = new();
+        public ObservableCollection<CodecInfo> SubtitleCodecs { get; } = new();
+        public ObservableCollection<CodecInfo> OtherCodecs { get; } = new();
+
+        // Video codec categories
+        public ObservableCollection<CodecInfo> H264VideoCodecs { get; } = new();
+        public ObservableCollection<CodecInfo> HevcVideoCodecs { get; } = new();
+        public ObservableCollection<CodecInfo> Av1VideoCodecs { get; } = new();
+        public ObservableCollection<CodecInfo> Mpeg4VideoCodecs { get; } = new();
+        public ObservableCollection<CodecInfo> QuickTimeVideoCodecs { get; } = new();
+        public ObservableCollection<CodecInfo> Vp9VideoCodecs { get; } = new();
+        public ObservableCollection<CodecInfo> OtherVideoCodecs { get; } = new();
+
+        // Audio codec categories
+        public ObservableCollection<CodecInfo> Mp3AudioCodecs { get; } = new();
+        public ObservableCollection<CodecInfo> Mp2AudioCodecs { get; } = new();
+        public ObservableCollection<CodecInfo> AacAudioCodecs { get; } = new();
+        public ObservableCollection<CodecInfo> Ac3AudioCodecs { get; } = new();
+        public ObservableCollection<CodecInfo> FlacAudioCodecs { get; } = new();
+        public ObservableCollection<CodecInfo> PcmAudioCodecs { get; } = new();
+        public ObservableCollection<CodecInfo> OtherAudioCodecs { get; } = new();
 
         public HomeViewModel()
         {
-            LoadMockData();
+            LoadFFmpegVersionAsync();
+            LoadHardwareInfo();
+            LoadCodecInfoAsync();
         }
 
-        private void LoadMockData()
+        private async void LoadFFmpegVersionAsync()
         {
-            // ƒ£ƒ‚ FFmpeg ∞Ê±æ–≈œ¢
-            FFmpegVersion = new FFmpegVersionInfo
+            try
             {
-                Version = "Œ¥ºÏ≤‚",
-                BuildDate = "-",
-                IsInstalled = false
-            };
+                var ffmpegService = FFmpegService.Instance;
+                var versionInfo = await ffmpegService.GetFFmpegVersionAsync();
+                FFmpegVersion = versionInfo;
+            }
+            catch
+            {
+                FFmpegVersion = new FFmpegVersionInfo
+                {
+                    Version = "Œ¥ÔøΩÔøΩÔøΩ",
+                    BuildDate = "-",
+                    IsInstalled = false
+                };
+            }
+        }
 
-            // ƒ£ƒ‚”≤º˛–≈œ¢
-            HardwareInfo = new HardwareInfo
-            {
-                CpuInfo = "Intel Core i7-10700K",
-                GpuInfo = "NVIDIA GeForce RTX 3080",
-                TotalMemory = 32 * 1024 * 1024 * 1024UL,
-                AvailableMemory = 16 * 1024 * 1024 * 1024UL,
-                CpuCoreCount = 8
-            };
+        private void LoadHardwareInfo()
+        {
+            var hardwareInfo = new HardwareInfo();
 
-            // ƒ£ƒ‚±‡Ω‚¬Î∆˜–≈œ¢
-            var codecs = new[]
+            // Load CPU information
+            try
             {
-                new CodecInfo { Name = "H.264", Description = "H.264 / AVC / MPEG-4 AVC", Category = " ”∆µ", IsEncoder = true, IsDecoder = true },
-                new CodecInfo { Name = "H.265", Description = "H.265 / HEVC", Category = " ”∆µ", IsEncoder = true, IsDecoder = true },
-                new CodecInfo { Name = "VP9", Description = "Google VP9", Category = " ”∆µ", IsEncoder = true, IsDecoder = true },
-                new CodecInfo { Name = "AV1", Description = "AV1 Video Codec", Category = " ”∆µ", IsEncoder = false, IsDecoder = true },
-                new CodecInfo { Name = "AAC", Description = "Advanced Audio Coding", Category = "“Ù∆µ", IsEncoder = true, IsDecoder = true },
-                new CodecInfo { Name = "MP3", Description = "MP3 Audio", Category = "“Ù∆µ", IsEncoder = false, IsDecoder = true },
-                new CodecInfo { Name = "OPUS", Description = "Opus Audio Codec", Category = "“Ù∆µ", IsEncoder = true, IsDecoder = true },
-                new CodecInfo { Name = "FLAC", Description = "FLAC Audio Codec", Category = "“Ù∆µ", IsEncoder = true, IsDecoder = true },
-            };
+                var processorCount = Environment.ProcessorCount;
+                var cpuInfo = GetProcessorName();
+                hardwareInfo.CpuInfo = cpuInfo;
+                hardwareInfo.CpuCoreCount = processorCount;
+            }
+            catch
+            {
+                // CPU information failed to load, leave as null for "Unknown" display
+            }
 
-            foreach (var codec in codecs)
+            // Load GPU information
+            try
             {
-                Codecs.Add(codec);
+                var gpuInfoList = GetGpuInfo();
+                hardwareInfo.GpuInfoList = gpuInfoList;
+            }
+            catch
+            {
+                // GPU information failed to load, leave as empty for "Unknown" display
+            }
+
+            // Load memory information
+            try
+            {
+                var memInfo = GetMemoryInfo();
+                hardwareInfo.TotalMemory = memInfo.total;
+                hardwareInfo.AvailableMemory = memInfo.available;
+            }
+            catch
+            {
+                // Memory information failed to load
+            }
+
+            HardwareInfo = hardwareInfo;
+        }
+
+        private string GetProcessorName()
+        {
+            try
+            {
+                // Try reading from registry
+                var key = Microsoft.Win32.Registry.LocalMachine.OpenSubKey(@"HARDWARE\DESCRIPTION\System\CentralProcessor\0");
+                if (key != null)
+                {
+                    return key.GetValue("ProcessorNameString")?.ToString();
+                }
+            }
+            catch { }
+
+            return null;
+        }
+
+        private List<string> GetGpuInfo()
+        {
+            var gpuList = new List<string>();
+
+            try
+            {
+                // Try to get from registry
+                var key = Microsoft.Win32.Registry.LocalMachine.OpenSubKey(@"HARDWARE\DEVICEMAP\VIDEO");
+                if (key != null)
+                {
+                    var subKeyNames = key.GetSubKeyNames();
+                    foreach (var subKeyName in subKeyNames.Take(4)) // Limit to first 4 GPUs
+                    {
+                        var subKey = key.OpenSubKey(subKeyName);
+                        var description = subKey?.GetValue("Description")?.ToString();
+                        if (!string.IsNullOrEmpty(description))
+                        {
+                            gpuList.Add(description);
+                        }
+                    }
+                }
+            }
+            catch { }
+
+            // Fallback: try WMI through PowerShell
+            if (gpuList.Count == 0)
+            {
+                try
+                {
+                    var process = Process.Start(new ProcessStartInfo
+                    {
+                        FileName = "powershell.exe",
+                        Arguments = "-NoProfile -Command \"Get-WmiObject Win32_VideoController | Select-Object -ExpandProperty Name\"",
+                        UseShellExecute = false,
+                        RedirectStandardOutput = true,
+                        CreateNoWindow = true
+                    });
+
+                    if (process != null)
+                    {
+                        using (var reader = process.StandardOutput)
+                        {
+                            string line;
+                            while ((line = reader.ReadLine()) != null)
+                            {
+                                if (!string.IsNullOrWhiteSpace(line))
+                                {
+                                    gpuList.Add(line.Trim());
+                                }
+                            }
+                        }
+                        process.WaitForExit();
+                    }
+                }
+                catch { }
+            }
+
+            return gpuList;
+        }
+
+        private (ulong total, ulong available) GetMemoryInfo()
+        {
+            ulong totalSystemMemory = 0;
+            ulong availableMemory = 0;
+
+            try
+            {
+                // Get available memory using PowerShell
+                var process = Process.Start(new ProcessStartInfo
+                {
+                    FileName = "powershell.exe",
+                    Arguments = "-NoProfile -Command \"[Math]::Round((Get-WmiObject Win32_OperatingSystem).FreePhysicalMemory * 1024)\"",
+                    UseShellExecute = false,
+                    RedirectStandardOutput = true,
+                    CreateNoWindow = true
+                });
+
+                if (process != null)
+                {
+                    using (var reader = process.StandardOutput)
+                    {
+                        var output = reader.ReadToEnd().Trim();
+                        if (ulong.TryParse(output, out var available))
+                        {
+                            availableMemory = available;
+                        }
+                    }
+                    process.WaitForExit();
+                }
+            }
+            catch { }
+
+            try
+            {
+                // Get total memory using PowerShell
+                var process = Process.Start(new ProcessStartInfo
+                {
+                    FileName = "powershell.exe",
+                    Arguments = "-NoProfile -Command \"[Math]::Round((Get-WmiObject Win32_OperatingSystem).TotalVisibleMemorySize * 1024)\"",
+                    UseShellExecute = false,
+                    RedirectStandardOutput = true,
+                    CreateNoWindow = true
+                });
+
+                if (process != null)
+                {
+                    using (var reader = process.StandardOutput)
+                    {
+                        var output = reader.ReadToEnd().Trim();
+                        if (ulong.TryParse(output, out var total))
+                        {
+                            totalSystemMemory = total;
+                        }
+                    }
+                    process.WaitForExit();
+                }
+            }
+            catch { }
+
+            // Fallback: use default if unable to detect
+            if (totalSystemMemory == 0)
+            {
+                totalSystemMemory = 8UL * 1024 * 1024 * 1024; // 8GB default
+            }
+
+            return (totalSystemMemory, availableMemory);
+        }
+
+        private async void LoadCodecInfoAsync()
+        {
+            IsCodecsLoading = true;
+            CodecsErrorMessage = string.Empty;
+
+            try
+            {
+                var ffmpegService = FFmpegService.Instance;
+                var codecs = await ffmpegService.GetCodecsAsync();
+
+                VideoCodecs.Clear();
+                AudioCodecs.Clear();
+                SubtitleCodecs.Clear();
+                OtherCodecs.Clear();
+
+                // Clear categorized collections
+                H264VideoCodecs.Clear();
+                HevcVideoCodecs.Clear();
+                Av1VideoCodecs.Clear();
+                Mpeg4VideoCodecs.Clear();
+                QuickTimeVideoCodecs.Clear();
+                Vp9VideoCodecs.Clear();
+                OtherVideoCodecs.Clear();
+
+                Mp3AudioCodecs.Clear();
+                Mp2AudioCodecs.Clear();
+                AacAudioCodecs.Clear();
+                Ac3AudioCodecs.Clear();
+                FlacAudioCodecs.Clear();
+                PcmAudioCodecs.Clear();
+                OtherAudioCodecs.Clear();
+
+                if (codecs.Count == 0)
+                {
+                    CodecsErrorMessage = "Êú™ËÉΩËé∑ÂèñÁºñËß£Á†ÅÂô®‰ø°ÊÅØÔºåËØ∑Ê£ÄÊü• FFmpeg ÊòØÂê¶Ê≠£Á°ÆÂÆâË£Ö„ÄÇ";
+                }
+                else
+                {
+                    foreach (var codec in codecs)
+                    {
+                        switch (codec.Category)
+                        {
+                            case "ËßÜÈ¢ë":
+                                VideoCodecs.Add(codec);
+                                CategorizeVideoCodec(codec);
+                                break;
+                            case "Èü≥È¢ë":
+                                AudioCodecs.Add(codec);
+                                CategorizeAudioCodec(codec);
+                                break;
+                            case "Â≠óÂπï":
+                                SubtitleCodecs.Add(codec);
+                                break;
+                            default:
+                                OtherCodecs.Add(codec);
+                                break;
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                CodecsErrorMessage = $"Âä†ËΩΩÁºñËß£Á†ÅÂô®‰ø°ÊÅØÊó∂Âá∫Èîô: {ex.Message}";
+            }
+            finally
+            {
+                IsCodecsLoading = false;
+            }
+        }
+
+        private void CategorizeVideoCodec(CodecInfo codec)
+        {
+            var name = codec.Name?.ToLower() ?? string.Empty;
+
+            if (name.Contains("h264") || name.Contains("h.264") || name == "libx264")
+            {
+                H264VideoCodecs.Add(codec);
+            }
+            else if (name.Contains("hevc") || name.Contains("h265") || name.Contains("h.265") || name == "libx265")
+            {
+                HevcVideoCodecs.Add(codec);
+            }
+            else if (name.Contains("av1"))
+            {
+                Av1VideoCodecs.Add(codec);
+            }
+            else if (name.Contains("mpeg4"))
+            {
+                Mpeg4VideoCodecs.Add(codec);
+            }
+            else if (name.Contains("qtrle") || name.Contains("prores") || name.Contains("dnxhd"))
+            {
+                QuickTimeVideoCodecs.Add(codec);
+            }
+            else if (name.Contains("vp9") || name == "libvpx-vp9")
+            {
+                Vp9VideoCodecs.Add(codec);
+            }
+            else
+            {
+                OtherVideoCodecs.Add(codec);
+            }
+        }
+
+        private void CategorizeAudioCodec(CodecInfo codec)
+        {
+            var name = codec.Name?.ToLower() ?? string.Empty;
+
+            if (name.Contains("mp3") || name == "libmp3lame")
+            {
+                Mp3AudioCodecs.Add(codec);
+            }
+            else if (name.Contains("mp2"))
+            {
+                Mp2AudioCodecs.Add(codec);
+            }
+            else if (name.Contains("aac") || name == "aac")
+            {
+                AacAudioCodecs.Add(codec);
+            }
+            else if (name.Contains("ac3"))
+            {
+                Ac3AudioCodecs.Add(codec);
+            }
+            else if (name.Contains("flac"))
+            {
+                FlacAudioCodecs.Add(codec);
+            }
+            else if (name.Contains("pcm"))
+            {
+                PcmAudioCodecs.Add(codec);
+            }
+            else
+            {
+                OtherAudioCodecs.Add(codec);
             }
         }
     }

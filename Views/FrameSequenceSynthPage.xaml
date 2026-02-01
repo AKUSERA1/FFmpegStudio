@@ -64,12 +64,12 @@
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
-                        <ComboBox IsEditable="True" ItemsSource="{Binding FrameRates}" Text="{Binding FrameRate, Mode=TwoWay}" SelectedItem="{Binding FrameRate, Mode=TwoWay}" Header="帧率 (fps)" />
-                        <ComboBox Grid.Column="1" ItemsSource="{Binding VideoEncoders}" SelectedItem="{Binding SelectedVideoEncoder, Mode=TwoWay}" Header="视频编码器" />
-                        <TextBox Grid.Column="2" PlaceholderText="5000k" Text="{Binding Bitrate, Mode=TwoWay}" Header="码率" />
-                        <ComboBox Grid.Column="3" ItemsSource="{Binding AudioEncoders}" SelectedItem="{Binding SelectedAudioEncoder, Mode=TwoWay}" Header="音频编码器" />
-                        <ComboBox Grid.Column="4" ItemsSource="{Binding Formats}" SelectedItem="{Binding SelectedFormat, Mode=TwoWay}" Header="容器" />
-                        <ComboBox Grid.Column="5" ItemsSource="{Binding ColorSpaces}" SelectedItem="{Binding ColorSpace, Mode=TwoWay}" Header="色彩空间" />
+						<ComboBox Grid.Column="0" ItemsSource="{Binding Formats}" SelectedItem="{Binding SelectedFormat, Mode=TwoWay}" Header="容器" />
+                        <ComboBox Grid.Column="1" IsEditable="True" ItemsSource="{Binding FrameRates}" Text="{Binding FrameRate, Mode=TwoWay}" SelectedItem="{Binding FrameRate, Mode=TwoWay}" Header="帧率 (fps)" />
+                        <ComboBox Grid.Column="2" ItemsSource="{Binding VideoEncoders}" SelectedItem="{Binding SelectedVideoEncoder, Mode=TwoWay}" Header="视频编码器" />
+                        <TextBox Grid.Column="3" PlaceholderText="kbits" Text="{Binding Bitrate, Mode=TwoWay}" Header="码率" />
+                        <ComboBox Grid.Column="4" ItemsSource="{Binding AudioEncoders}" SelectedItem="{Binding SelectedAudioEncoder, Mode=TwoWay}" Header="音频编码器" />
+                        <ComboBox Grid.Column="5" ItemsSource="{Binding ColorSpaces}" SelectedItem="{Binding ColorSpace, Mode=TwoWay}" Header="色彩空间" Visibility="{Binding ShowAdvanced, Converter={StaticResource BoolToVisibilityConverter}}" />
                     </Grid>
                     <StackPanel Orientation="Horizontal" Spacing="10" Margin="0,10,0,0">
                         <Button Content="开始合成" Style="{ThemeResource AccentButtonStyle}" />

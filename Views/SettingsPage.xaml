@@ -23,8 +23,8 @@
                         <TextBox PlaceholderText="选择 FFmpeg 可执行文件路径..." Text="{Binding FFmpegPath, Mode=TwoWay}" IsReadOnly="True" />
                         <Button Grid.Column="1" Content="浏览" CornerRadius="4" Command="{Binding BrowseFFmpegCommand}" />
                     </Grid>
-                    <InfoBar IsOpen="{Binding IsFFmpegInstalled}" Title="状态" Message="FFmpeg 已安装" Severity="Success" IsClosable="False" Margin="0,8,0,0" />
-                    <InfoBar IsOpen="{Binding IsFFmpegInstalled, Converter={StaticResource NegativeBoolConverter}}" Title="状态" Message="FFmpeg 未安装" Severity="Warning" IsClosable="False" Margin="0,8,0,0" />
+                    <InfoBar IsOpen="{Binding IsFFmpegInstalled}" Title="状态" Message="{Binding FFmpegStatus}" Severity="Success" IsClosable="False" Margin="0,8,0,0" />
+                    <InfoBar IsOpen="{Binding IsFFmpegInstalled, Converter={StaticResource NegativeBoolConverter}}" Title="警告" Message="FFmpeg 未检测到，请手动选择或通过 WinGet 安装" Severity="Warning" IsClosable="False" Margin="0,8,0,0" />
                 </StackPanel>
             </Border>
 
@@ -32,9 +32,9 @@
                 <StackPanel Spacing="12">
                     <TextBlock Text="WinGet 安装 FFmpeg" FontSize="18" FontWeight="SemiBold" />
                     <TextBlock Text="使用 WinGet 包管理器自动安装 FFmpeg" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                    <Button Content="通过 WinGet 安装 FFmpeg" Style="{ThemeResource AccentButtonStyle}" Command="{Binding InstallFFmpegWithWinGetCommand}" />
-                    <ProgressBar IsIndeterminate="{Binding IsInstallingFFmpeg}" Visibility="{Binding IsInstallingFFmpeg, Converter={StaticResource BoolVisibilityConverter}}" Margin="0,8,0,0" />
-                    <TextBlock Text="{Binding InstallationStatus}" Visibility="{Binding ShowInstallationStatus, Converter={StaticResource BoolVisibilityConverter}}" Margin="0,8,0,0" />
+                    <Button Content="通过 WinGet 安装 FFmpeg" Style="{ThemeResource AccentButtonStyle}" Command="{Binding InstallFFmpegWithWinGetCommand}" IsEnabled="{Binding IsInstallingFFmpeg, Converter={StaticResource NegativeBoolConverter}}" />
+                    <ProgressBar IsIndeterminate="{Binding IsInstallingFFmpeg}" Visibility="{Binding IsInstallingFFmpeg, Converter={StaticResource BoolToVisibilityConverter}}" Margin="0,8,0,0" />
+                    <TextBlock Text="{Binding InstallationStatus}" Visibility="{Binding ShowInstallationStatus, Converter={StaticResource BoolToVisibilityConverter}}" Margin="0,8,0,0" />
                 </StackPanel>
             </Border>
 
@@ -42,7 +42,7 @@
                 <StackPanel Spacing="12">
                     <TextBlock Text="高级选项" FontSize="18" FontWeight="SemiBold" />
                     <StackPanel Orientation="Horizontal" Spacing="12">
-                        <ToggleSwitch IsOn="{Binding ShowAdvanced, Mode=TwoWay}" Header="启用高级功能" />
+                        <ToggleSwitch IsOn="{Binding ShowAdvancedFeatures, Mode=TwoWay}" Header="启用高级功能" />
                     </StackPanel>
                     <TextBlock Text="启用后，所有页面将显示高级功能选项" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" />
                 </StackPanel>

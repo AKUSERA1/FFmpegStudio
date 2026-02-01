@@ -5,14 +5,20 @@ namespace FFmpegStudio.ViewModels
 {
     public class TranscodeViewModel : ViewModelBase
     {
+        private readonly Services.SettingsService _settingsService;
+
         private string _sourceFilePath = string.Empty;
         private string _selectedFormat = "MP4";
         private string _selectedEncoder = "H.264";
         private string _resolution = "1920x1080";
         private string _bitrate = "5000k";
         private string _frameRate = "30";
-        private bool _showAdvanced;
         private string _colorSpace = "BT.709";
+
+        public TranscodeViewModel()
+        {
+            _settingsService = Services.SettingsService.Instance;
+        }
 
         public string SourceFilePath
         {
@@ -52,8 +58,12 @@ namespace FFmpegStudio.ViewModels
 
         public bool ShowAdvanced
         {
-            get => _showAdvanced;
-            set => SetProperty(ref _showAdvanced, value);
+            get => _settingsService.ShowAdvancedFeatures;
+            set
+            {
+                _settingsService.ShowAdvancedFeatures = value;
+                OnPropertyChanged(nameof(ShowAdvanced));
+            }
         }
 
         public string ColorSpace
@@ -74,8 +84,9 @@ namespace FFmpegStudio.ViewModels
 
         public ObservableCollection<TranscodeTask> Tasks { get; } = new();
 
-        public TranscodeViewModel()
+        public TranscodeViewModel(Services.SettingsService settingsService) : this()
         {
+            _settingsService = settingsService;
             LoadMockTasks();
         }
 
@@ -86,7 +97,7 @@ namespace FFmpegStudio.ViewModels
                 Id = "1",
                 SourceFile = "video1.mp4",
                 OutputFile = "video1_transcoded.mkv",
-                Status = "ÕÍ≥…",
+                Status = "ÂÆåÊàê",
                 Progress = 100,
                 CreateTime = System.DateTime.Now.AddHours(-2)
             });
@@ -96,7 +107,7 @@ namespace FFmpegStudio.ViewModels
                 Id = "2",
                 SourceFile = "video2.avi",
                 OutputFile = "video2_transcoded.mp4",
-                Status = "¥¶¿Ì÷–",
+                Status = "ËΩ¨Êç¢‰∏≠",
                 Progress = 45,
                 CreateTime = System.DateTime.Now.AddMinutes(-30)
             });

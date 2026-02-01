@@ -1,30 +1,76 @@
 using System;
+using System.IO;
+using System.Threading.Tasks;
+using FFmpegStudio.Services;
+using Windows.Storage.Pickers;
+using Microsoft.UI.Xaml.Controls;
 
 namespace FFmpegStudio.ViewModels
 {
     public class SettingsViewModel : ViewModelBase
     {
+        private readonly SettingsService _settingsService;
+        private readonly FFmpegService _ffmpegService;
+
         private string _ffmpegPath = string.Empty;
         private bool _useWinget;
-        private bool _showAdvancedFeatures;
-        private string _ffmpegStatus = "Î´¼ì²â";
+        private string _ffmpegStatus = "æœªæ£€æµ‹";
+        private bool _isFFmpegInstalled;
+        private bool _isInstallingFFmpeg;
+        private string _installationStatus = string.Empty;
+        private bool _showInstallationStatus;
+
+        public SettingsViewModel()
+        {
+            _settingsService = SettingsService.Instance;
+            _ffmpegService = FFmpegService.Instance;
+            BrowseFFmpegCommand = new RelayCommand(_ => BrowseFFmpegAsync());
+            InstallFFmpegWithWinGetCommand = new RelayCommand(_ => InstallFFmpegAsync());
+            LoadSettings();
+        }
+
+        private void LoadSettings()
+        {
+            _ffmpegPath = _settingsService.FFmpegPath;
+            _useWinget = _settingsService.UseWinget;
+            CheckFFmpegInstallationAsync();
+            OnPropertyChanged(nameof(FFmpegPath));
+            OnPropertyChanged(nameof(UseWinget));
+        }
 
         public string FFmpegPath
         {
             get => _ffmpegPath;
-            set => SetProperty(ref _ffmpegPath, value);
+            set
+            {
+                if (SetProperty(ref _ffmpegPath, value))
+                {
+                    _settingsService.FFmpegPath = value;
+                    CheckFFmpegInstallationAsync();
+                }
+            }
         }
 
         public bool UseWinget
         {
             get => _useWinget;
-            set => SetProperty(ref _useWinget, value);
+            set
+            {
+                if (SetProperty(ref _useWinget, value))
+                {
+                    _settingsService.UseWinget = value;
+                }
+            }
         }
 
         public bool ShowAdvancedFeatures
         {
-            get => _showAdvancedFeatures;
-            set => SetProperty(ref _showAdvancedFeatures, value);
+            get => _settingsService.ShowAdvancedFeatures;
+            set
+            {
+                _settingsService.ShowAdvancedFeatures = value;
+                OnPropertyChanged(nameof(ShowAdvancedFeatures));
+            }
         }
 
         public string FFmpegStatus
@@ -33,30 +79,128 @@ namespace FFmpegStudio.ViewModels
             set => SetProperty(ref _ffmpegStatus, value);
         }
 
+        public bool IsFFmpegInstalled
+        {
+            get => _isFFmpegInstalled;
+            set => SetProperty(ref _isFFmpegInstalled, value);
+        }
+
+        public bool IsInstallingFFmpeg
+        {
+            get => _isInstallingFFmpeg;
+            set => SetProperty(ref _isInstallingFFmpeg, value);
+        }
+
+        public string InstallationStatus
+        {
+            get => _installationStatus;
+            set => SetProperty(ref _installationStatus, value);
+        }
+
+        public bool ShowInstallationStatus
+        {
+            get => _showInstallationStatus;
+            set => SetProperty(ref _showInstallationStatus, value);
+        }
+
         public RelayCommand BrowseFFmpegCommand { get; }
-        public RelayCommand InstallFFmpegCommand { get; }
+        public RelayCommand InstallFFmpegWithWinGetCommand { get; }
         public RelayCommand SaveSettingsCommand { get; }
 
-        public SettingsViewModel()
+        private async void BrowseFFmpegAsync()
         {
-            BrowseFFmpegCommand = new RelayCommand(_ => BrowseFFmpeg());
-            InstallFFmpegCommand = new RelayCommand(_ => InstallFFmpeg());
-            SaveSettingsCommand = new RelayCommand(_ => SaveSettings());
+            try
+            {
+                var openPicker = new FileOpenPicker();
+                openPicker.FileTypeFilter.Add(".exe");
+                openPicker.SuggestedStartLocation = PickerLocationId.ComputerFolder;
+
+                // Get the main window handle
+                var mainWindow = (Microsoft.UI.Xaml.Application.Current as App)?.Window;
+                if (mainWindow != null)
+                {
+                    var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(mainWindow);
+                    WinRT.Interop.InitializeWithWindow.Initialize(openPicker, hwnd);
+                }
+
+                var file = await openPicker.PickSingleFileAsync();
+                if (file != null && file.Name.Equals("ffmpeg.exe", StringComparison.OrdinalIgnoreCase))
+                {
+                    FFmpegPath = file.Path;
+                }
+                else if (file != null)
+                {
+                    ShowInstallationStatus = true;
+                    InstallationStatus = "é”™è¯¯: è¯·é€‰æ‹© ffmpeg.exe æ–‡ä»¶";
+                }
+            }
+            catch (Exception ex)
+            {
+                ShowInstallationStatus = true;
+                InstallationStatus = $"é”™è¯¯: {ex.Message}";
+            }
         }
 
-        private void BrowseFFmpeg()
+        private async void CheckFFmpegInstallationAsync()
         {
-            // TODO: ÊµÏÖÎÄ¼şä¯ÀÀÂß¼­
+            try
+            {
+                var versionInfo = await _ffmpegService.GetFFmpegVersionAsync();
+                IsFFmpegInstalled = versionInfo.IsInstalled;
+                FFmpegStatus = versionInfo.IsInstalled ? $"å·²å®‰è£… - ç‰ˆæœ¬ {versionInfo.Version}" : "æœªæ£€æµ‹";
+            }
+            catch
+            {
+                IsFFmpegInstalled = false;
+                FFmpegStatus = "æœªæ£€æµ‹";
+            }
         }
 
-        private void InstallFFmpeg()
+        private async void InstallFFmpegAsync()
         {
-            // TODO: ÊµÏÖ winget °²×°Âß¼­
-        }
+            IsInstallingFFmpeg = true;
+            ShowInstallationStatus = true;
+            InstallationStatus = "æ­£åœ¨å®‰è£… FFmpeg...";
 
-        private void SaveSettings()
-        {
-            // TODO: ÊµÏÖÉèÖÃ±£´æÂß¼­
+            try
+            {
+                var processInfo = new System.Diagnostics.ProcessStartInfo
+                {
+                    FileName = "powershell.exe",
+                    Arguments = "-NoProfile -Command \"winget install FFmpeg -e\"",
+                    UseShellExecute = true,
+                    CreateNoWindow = false
+                };
+
+                using (var process = System.Diagnostics.Process.Start(processInfo))
+                {
+                    if (process != null)
+                    {
+                        await Task.Run(() => process.WaitForExit());
+                        
+                        // Check if installation was successful
+                        await Task.Delay(1000);
+                        CheckFFmpegInstallationAsync();
+
+                        if (IsFFmpegInstalled)
+                        {
+                            InstallationStatus = "FFmpeg å®‰è£…æˆåŠŸ";
+                        }
+                        else
+                        {
+                            InstallationStatus = "FFmpeg å®‰è£…å¯èƒ½å¤±è´¥ï¼Œè¯·æ£€æŸ¥";
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                InstallationStatus = $"å®‰è£…å¤±è´¥: {ex.Message}";
+            }
+            finally
+            {
+                IsInstallingFFmpeg = false;
+            }
         }
     }
 
