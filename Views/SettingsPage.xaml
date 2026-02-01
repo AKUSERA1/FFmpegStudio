@@ -42,7 +42,7 @@
                 <StackPanel Spacing="12">
                     <TextBlock Text="高级选项" FontSize="18" FontWeight="SemiBold" />
                     <StackPanel Orientation="Horizontal" Spacing="12">
-                        <ToggleSwitch IsOn="{Binding ShowAdvanced, Mode=TwoWay}" Header="启用高级功能" />
+                        <ToggleSwitch IsOn="{Binding ShowAdvancedFeatures, Mode=TwoWay}" Header="启用高级功能" />
                     </StackPanel>
                     <TextBlock Text="启用后，所有页面将显示高级功能选项" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" />
                 </StackPanel>

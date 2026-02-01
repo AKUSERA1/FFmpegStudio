@@ -5,12 +5,18 @@ namespace FFmpegStudio.ViewModels
 {
     public class FrameSequenceSynthViewModel : ViewModelBase
     {
+        private readonly Services.SettingsService _settingsService;
+
         private string _frameSequencePath = string.Empty;
         private string _selectedFormat = "MP4";
         private string _frameRate = "30";
-        private bool _showAdvanced;
         private string _colorSpace = "BT.709";
         private int _selectedFrameIndex;
+
+        public FrameSequenceSynthViewModel()
+        {
+            _settingsService = Services.SettingsService.Instance;
+        }
 
         public string FrameSequencePath
         {
@@ -32,8 +38,12 @@ namespace FFmpegStudio.ViewModels
 
         public bool ShowAdvanced
         {
-            get => _showAdvanced;
-            set => SetProperty(ref _showAdvanced, value);
+            get => _settingsService.ShowAdvancedFeatures;
+            set
+            {
+                _settingsService.ShowAdvancedFeatures = value;
+                OnPropertyChanged(nameof(ShowAdvanced));
+            }
         }
 
         public string ColorSpace

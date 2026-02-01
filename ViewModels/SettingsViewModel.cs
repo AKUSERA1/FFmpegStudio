@@ -4,27 +4,58 @@ namespace FFmpegStudio.ViewModels
 {
     public class SettingsViewModel : ViewModelBase
     {
+        private readonly Services.SettingsService _settingsService;
+
         private string _ffmpegPath = string.Empty;
         private bool _useWinget;
-        private bool _showAdvancedFeatures;
-        private string _ffmpegStatus = "Î´¼ì²â";
+        private string _ffmpegStatus = "æœªæ£€æµ‹";
+
+        public SettingsViewModel()
+        {
+            _settingsService = Services.SettingsService.Instance;
+            LoadSettings();
+        }
+
+        private void LoadSettings()
+        {
+            _ffmpegPath = _settingsService.FFmpegPath;
+            _useWinget = _settingsService.UseWinget;
+            OnPropertyChanged(nameof(FFmpegPath));
+            OnPropertyChanged(nameof(UseWinget));
+        }
 
         public string FFmpegPath
         {
             get => _ffmpegPath;
-            set => SetProperty(ref _ffmpegPath, value);
+            set
+            {
+                if (SetProperty(ref _ffmpegPath, value))
+                {
+                    _settingsService.FFmpegPath = value;
+                }
+            }
         }
 
         public bool UseWinget
         {
             get => _useWinget;
-            set => SetProperty(ref _useWinget, value);
+            set
+            {
+                if (SetProperty(ref _useWinget, value))
+                {
+                    _settingsService.UseWinget = value;
+                }
+            }
         }
 
         public bool ShowAdvancedFeatures
         {
-            get => _showAdvancedFeatures;
-            set => SetProperty(ref _showAdvancedFeatures, value);
+            get => _settingsService.ShowAdvancedFeatures;
+            set
+            {
+                _settingsService.ShowAdvancedFeatures = value;
+                OnPropertyChanged(nameof(ShowAdvancedFeatures));
+            }
         }
 
         public string FFmpegStatus
@@ -37,8 +68,9 @@ namespace FFmpegStudio.ViewModels
         public RelayCommand InstallFFmpegCommand { get; }
         public RelayCommand SaveSettingsCommand { get; }
 
-        public SettingsViewModel()
+        public SettingsViewModel(Services.SettingsService settingsService) : this()
         {
+            _settingsService = settingsService;
             BrowseFFmpegCommand = new RelayCommand(_ => BrowseFFmpeg());
             InstallFFmpegCommand = new RelayCommand(_ => InstallFFmpeg());
             SaveSettingsCommand = new RelayCommand(_ => SaveSettings());
@@ -46,17 +78,14 @@ namespace FFmpegStudio.ViewModels
 
         private void BrowseFFmpeg()
         {
-            // TODO: ÊµÏÖÎÄ¼şä¯ÀÀÂß¼­
         }
 
         private void InstallFFmpeg()
         {
-            // TODO: ÊµÏÖ winget °²×°Âß¼­
         }
 
         private void SaveSettings()
         {
-            // TODO: ÊµÏÖÉèÖÃ±£´æÂß¼­
         }
     }
 

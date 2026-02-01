@@ -4,12 +4,18 @@ namespace FFmpegStudio.ViewModels
 {
     public class VideoExtractViewModel : ViewModelBase
     {
+        private readonly Services.SettingsService _settingsService;
+
         private string _videoFilePath = string.Empty;
         private string _outputPath = string.Empty;
         private string _fileNameTemplate = "frame_%06d.png";
         private string _selectedFormat = "PNG";
-        private bool _showAdvanced;
         private string _frameInterval = "1";
+
+        public VideoExtractViewModel()
+        {
+            _settingsService = Services.SettingsService.Instance;
+        }
 
         public string VideoFilePath
         {
@@ -37,8 +43,12 @@ namespace FFmpegStudio.ViewModels
 
         public bool ShowAdvanced
         {
-            get => _showAdvanced;
-            set => SetProperty(ref _showAdvanced, value);
+            get => _settingsService.ShowAdvancedFeatures;
+            set
+            {
+                _settingsService.ShowAdvancedFeatures = value;
+                OnPropertyChanged(nameof(ShowAdvanced));
+            }
         }
 
         public string FrameInterval
