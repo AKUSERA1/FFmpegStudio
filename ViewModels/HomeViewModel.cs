@@ -3,6 +3,7 @@ using System.Collections.ObjectModel;
 using System.Collections.Generic;
 using System.Linq;
 using System.Diagnostics;
+using System.Threading.Tasks;
 using FFmpegStudio.Models;
 using FFmpegStudio.Services;
 
@@ -13,6 +14,8 @@ namespace FFmpegStudio.ViewModels
         private FFmpegVersionInfo _ffmpegVersion = new();
         private HardwareInfo _hardwareInfo = new();
         private bool _isLoading;
+        private bool _isCodecsLoading;
+        private string _codecsErrorMessage = string.Empty;
 
         public FFmpegVersionInfo FFmpegVersion
         {
@@ -32,13 +35,28 @@ namespace FFmpegStudio.ViewModels
             set => SetProperty(ref _isLoading, value);
         }
 
-        public ObservableCollection<CodecInfo> Codecs { get; } = new();
+        public bool IsCodecsLoading
+        {
+            get => _isCodecsLoading;
+            set => SetProperty(ref _isCodecsLoading, value);
+        }
+
+        public string CodecsErrorMessage
+        {
+            get => _codecsErrorMessage;
+            set => SetProperty(ref _codecsErrorMessage, value);
+        }
+
+        public ObservableCollection<CodecInfo> VideoCodecs { get; } = new();
+        public ObservableCollection<CodecInfo> AudioCodecs { get; } = new();
+        public ObservableCollection<CodecInfo> SubtitleCodecs { get; } = new();
+        public ObservableCollection<CodecInfo> OtherCodecs { get; } = new();
 
         public HomeViewModel()
         {
             LoadFFmpegVersionAsync();
             LoadHardwareInfo();
-            LoadCodecInfo();
+            LoadCodecInfoAsync();
         }
 
         private async void LoadFFmpegVersionAsync()
@@ -53,7 +71,7 @@ namespace FFmpegStudio.ViewModels
             {
                 FFmpegVersion = new FFmpegVersionInfo
                 {
-                    Version = "δ���",
+                    Version = "δ���",
                     BuildDate = "-",
                     IsInstalled = false
                 };
@@ -247,23 +265,54 @@ namespace FFmpegStudio.ViewModels
             return (totalSystemMemory, availableMemory);
         }
 
-        private void LoadCodecInfo()
+        private async void LoadCodecInfoAsync()
         {
-            var codecs = new[]
-            {
-                new CodecInfo { Name = "H.264", Description = "H.264 / AVC / MPEG-4 AVC", Category = "��Ƶ", IsEncoder = true, IsDecoder = true },
-                new CodecInfo { Name = "H.265", Description = "H.265 / HEVC", Category = "��Ƶ", IsEncoder = true, IsDecoder = true },
-                new CodecInfo { Name = "VP9", Description = "Google VP9", Category = "��Ƶ", IsEncoder = true, IsDecoder = true },
-                new CodecInfo { Name = "AV1", Description = "AV1 Video Codec", Category = "��Ƶ", IsEncoder = false, IsDecoder = true },
-                new CodecInfo { Name = "AAC", Description = "Advanced Audio Coding", Category = "��Ƶ", IsEncoder = true, IsDecoder = true },
-                new CodecInfo { Name = "MP3", Description = "MP3 Audio", Category = "��Ƶ", IsEncoder = false, IsDecoder = true },
-                new CodecInfo { Name = "OPUS", Description = "Opus Audio Codec", Category = "��Ƶ", IsEncoder = true, IsDecoder = true },
-                new CodecInfo { Name = "FLAC", Description = "FLAC Audio Codec", Category = "��Ƶ", IsEncoder = true, IsDecoder = true },
-            };
+            IsCodecsLoading = true;
+            CodecsErrorMessage = string.Empty;
 
-            foreach (var codec in codecs)
+            try
             {
-                Codecs.Add(codec);
+                var ffmpegService = FFmpegService.Instance;
+                var codecs = await ffmpegService.GetCodecsAsync();
+
+                VideoCodecs.Clear();
+                AudioCodecs.Clear();
+                SubtitleCodecs.Clear();
+                OtherCodecs.Clear();
+
+                if (codecs.Count == 0)
+                {
+                    CodecsErrorMessage = "未能获取编解码器信息，请检查 FFmpeg 是否正确安装。";
+                }
+                else
+                {
+                    foreach (var codec in codecs)
+                    {
+                        switch (codec.Category)
+                        {
+                            case "视频":
+                                VideoCodecs.Add(codec);
+                                break;
+                            case "音频":
+                                AudioCodecs.Add(codec);
+                                break;
+                            case "字幕":
+                                SubtitleCodecs.Add(codec);
+                                break;
+                            default:
+                                OtherCodecs.Add(codec);
+                                break;
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                CodecsErrorMessage = $"加载编解码器信息时出错: {ex.Message}";
+            }
+            finally
+            {
+                IsCodecsLoading = false;
             }
         }
     }

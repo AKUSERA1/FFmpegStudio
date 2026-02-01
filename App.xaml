@@ -11,8 +11,10 @@
                 <XamlControlsResources xmlns="using:Microsoft.UI.Xaml.Controls" />
             </ResourceDictionary.MergedDictionaries>
             
-            <converters:BoolVisibilityConverter x:Key="BoolVisibilityConverter" />
+            <converters:BoolVisibilityConverter x:Key="BoolToVisibilityConverter" />
             <converters:NegativeBoolConverter x:Key="NegativeBoolConverter" />
+            <converters:NegativeBoolToVisibilityConverter x:Key="NegativeBoolToVisibilityConverter" />
+            <converters:StringNotEmptyToBoolConverter x:Key="StringNotEmptyToBoolConverter" />
         </ResourceDictionary>
     </Application.Resources>
 </Application>
