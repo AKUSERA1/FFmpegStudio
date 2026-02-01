@@ -36,7 +36,7 @@ namespace FFmpegStudio.Services
                 // FFmpeg not found or command failed
                 return new FFmpegVersionInfo
                 {
-                    Version = "δ���",
+                    Version = "未知",
                     BuildDate = "-",
                     IsInstalled = false
                 };
