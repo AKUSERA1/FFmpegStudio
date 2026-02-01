@@ -91,29 +91,198 @@
                                 <TextBlock Text="视频编解码器" FontWeight="SemiBold" FontSize="16" />
                                 <TextBlock Text="{Binding VideoCodecs.Count, Mode=OneWay}" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" />
                             </StackPanel>
-                            <ItemsRepeater ItemsSource="{Binding VideoCodecs}">
-                                <ItemsRepeater.Layout>
-                                    <UniformGridLayout MinItemWidth="280" MinItemHeight="100" MinColumnSpacing="12" MinRowSpacing="12" />
-                                </ItemsRepeater.Layout>
-                                <ItemsRepeater.ItemTemplate>
-                                    <DataTemplate>
-                                        <Border BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Padding="12" Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}">
-                                            <StackPanel Spacing="6">
-                                                <TextBlock Text="{Binding Name}" FontWeight="SemiBold" FontSize="14" />
-                                                <TextBlock Text="{Binding Description}" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" MaxLines="2" />
-                                                <StackPanel Orientation="Horizontal" Spacing="4">
-                                                    <Border Background="{ThemeResource SystemFillColorSuccessBrush}" CornerRadius="4" Padding="6,2" Visibility="{Binding IsEncoder, Converter={StaticResource BoolToVisibilityConverter}}">
-                                                        <TextBlock Text="编码" FontSize="11" Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" />
-                                                    </Border>
-                                                    <Border Background="{ThemeResource SystemFillColorCautionBrush}" CornerRadius="4" Padding="6,2" Visibility="{Binding IsDecoder, Converter={StaticResource BoolToVisibilityConverter}}">
-                                                        <TextBlock Text="解码" FontSize="11" Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" />
-                                                    </Border>
-                                                </StackPanel>
-                                            </StackPanel>
-                                        </Border>
-                                    </DataTemplate>
-                                </ItemsRepeater.ItemTemplate>
-                            </ItemsRepeater>
+                            
+                            <!-- 常见视频编码类别 -->
+                            <StackPanel Spacing="12">
+                                <!-- H.264 -->
+                                <Expander Header="H.264" IsExpanded="True">
+                                    <ItemsRepeater ItemsSource="{Binding H264VideoCodecs}">
+                                        <ItemsRepeater.Layout>
+                                            <UniformGridLayout MinItemWidth="280" MinItemHeight="100" MinColumnSpacing="12" MinRowSpacing="12" />
+                                        </ItemsRepeater.Layout>
+                                        <ItemsRepeater.ItemTemplate>
+                                            <DataTemplate>
+                                                <Border BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Padding="12" Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}">
+                                                    <StackPanel Spacing="6">
+                                                        <TextBlock Text="{Binding Name}" FontWeight="SemiBold" FontSize="14" />
+                                                        <TextBlock Text="{Binding Description}" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" MaxLines="2" />
+                                                        <StackPanel Orientation="Horizontal" Spacing="4">
+                                                            <Border Background="{ThemeResource SystemFillColorSuccessBrush}" CornerRadius="4" Padding="6,2" Visibility="{Binding IsEncoder, Converter={StaticResource BoolToVisibilityConverter}}">
+                                                                <TextBlock Text="编码" FontSize="11" Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" />
+                                                            </Border>
+                                                            <Border Background="{ThemeResource SystemFillColorCautionBrush}" CornerRadius="4" Padding="6,2" Visibility="{Binding IsDecoder, Converter={StaticResource BoolToVisibilityConverter}}">
+                                                                <TextBlock Text="解码" FontSize="11" Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" />
+                                                            </Border>
+                                                        </StackPanel>
+                                                    </StackPanel>
+                                                </Border>
+                                            </DataTemplate>
+                                        </ItemsRepeater.ItemTemplate>
+                                    </ItemsRepeater>
+                                </Expander>
+                                
+                                <!-- HEVC -->
+                                <Expander Header="HEVC" IsExpanded="True">
+                                    <ItemsRepeater ItemsSource="{Binding HevcVideoCodecs}">
+                                        <ItemsRepeater.Layout>
+                                            <UniformGridLayout MinItemWidth="280" MinItemHeight="100" MinColumnSpacing="12" MinRowSpacing="12" />
+                                        </ItemsRepeater.Layout>
+                                        <ItemsRepeater.ItemTemplate>
+                                            <DataTemplate>
+                                                <Border BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Padding="12" Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}">
+                                                    <StackPanel Spacing="6">
+                                                        <TextBlock Text="{Binding Name}" FontWeight="SemiBold" FontSize="14" />
+                                                        <TextBlock Text="{Binding Description}" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" MaxLines="2" />
+                                                        <StackPanel Orientation="Horizontal" Spacing="4">
+                                                            <Border Background="{ThemeResource SystemFillColorSuccessBrush}" CornerRadius="4" Padding="6,2" Visibility="{Binding IsEncoder, Converter={StaticResource BoolToVisibilityConverter}}">
+                                                                <TextBlock Text="编码" FontSize="11" Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" />
+                                                            </Border>
+                                                            <Border Background="{ThemeResource SystemFillColorCautionBrush}" CornerRadius="4" Padding="6,2" Visibility="{Binding IsDecoder, Converter={StaticResource BoolToVisibilityConverter}}">
+                                                                <TextBlock Text="解码" FontSize="11" Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" />
+                                                            </Border>
+                                                        </StackPanel>
+                                                    </StackPanel>
+                                                </Border>
+                                            </DataTemplate>
+                                        </ItemsRepeater.ItemTemplate>
+                                    </ItemsRepeater>
+                                </Expander>
+                                
+                                <!-- AV1 -->
+                                <Expander Header="AV1" IsExpanded="True">
+                                    <ItemsRepeater ItemsSource="{Binding Av1VideoCodecs}">
+                                        <ItemsRepeater.Layout>
+                                            <UniformGridLayout MinItemWidth="280" MinItemHeight="100" MinColumnSpacing="12" MinRowSpacing="12" />
+                                        </ItemsRepeater.Layout>
+                                        <ItemsRepeater.ItemTemplate>
+                                            <DataTemplate>
+                                                <Border BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Padding="12" Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}">
+                                                    <StackPanel Spacing="6">
+                                                        <TextBlock Text="{Binding Name}" FontWeight="SemiBold" FontSize="14" />
+                                                        <TextBlock Text="{Binding Description}" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" MaxLines="2" />
+                                                        <StackPanel Orientation="Horizontal" Spacing="4">
+                                                            <Border Background="{ThemeResource SystemFillColorSuccessBrush}" CornerRadius="4" Padding="6,2" Visibility="{Binding IsEncoder, Converter={StaticResource BoolToVisibilityConverter}}">
+                                                                <TextBlock Text="编码" FontSize="11" Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" />
+                                                            </Border>
+                                                            <Border Background="{ThemeResource SystemFillColorCautionBrush}" CornerRadius="4" Padding="6,2" Visibility="{Binding IsDecoder, Converter={StaticResource BoolToVisibilityConverter}}">
+                                                                <TextBlock Text="解码" FontSize="11" Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" />
+                                                            </Border>
+                                                        </StackPanel>
+                                                    </StackPanel>
+                                                </Border>
+                                            </DataTemplate>
+                                        </ItemsRepeater.ItemTemplate>
+                                    </ItemsRepeater>
+                                </Expander>
+                                
+                                <!-- MPEG4 -->
+                                <Expander Header="MPEG4" IsExpanded="True">
+                                    <ItemsRepeater ItemsSource="{Binding Mpeg4VideoCodecs}">
+                                        <ItemsRepeater.Layout>
+                                            <UniformGridLayout MinItemWidth="280" MinItemHeight="100" MinColumnSpacing="12" MinRowSpacing="12" />
+                                        </ItemsRepeater.Layout>
+                                        <ItemsRepeater.ItemTemplate>
+                                            <DataTemplate>
+                                                <Border BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Padding="12" Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}">
+                                                    <StackPanel Spacing="6">
+                                                        <TextBlock Text="{Binding Name}" FontWeight="SemiBold" FontSize="14" />
+                                                        <TextBlock Text="{Binding Description}" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" MaxLines="2" />
+                                                        <StackPanel Orientation="Horizontal" Spacing="4">
+                                                            <Border Background="{ThemeResource SystemFillColorSuccessBrush}" CornerRadius="4" Padding="6,2" Visibility="{Binding IsEncoder, Converter={StaticResource BoolToVisibilityConverter}}">
+                                                                <TextBlock Text="编码" FontSize="11" Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" />
+                                                            </Border>
+                                                            <Border Background="{ThemeResource SystemFillColorCautionBrush}" CornerRadius="4" Padding="6,2" Visibility="{Binding IsDecoder, Converter={StaticResource BoolToVisibilityConverter}}">
+                                                                <TextBlock Text="解码" FontSize="11" Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" />
+                                                            </Border>
+                                                        </StackPanel>
+                                                    </StackPanel>
+                                                </Border>
+                                            </DataTemplate>
+                                        </ItemsRepeater.ItemTemplate>
+                                    </ItemsRepeater>
+                                </Expander>
+                                
+                                <!-- QuickTime -->
+                                <Expander Header="QuickTime" IsExpanded="True">
+                                    <ItemsRepeater ItemsSource="{Binding QuickTimeVideoCodecs}">
+                                        <ItemsRepeater.Layout>
+                                            <UniformGridLayout MinItemWidth="280" MinItemHeight="100" MinColumnSpacing="12" MinRowSpacing="12" />
+                                        </ItemsRepeater.Layout>
+                                        <ItemsRepeater.ItemTemplate>
+                                            <DataTemplate>
+                                                <Border BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Padding="12" Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}">
+                                                    <StackPanel Spacing="6">
+                                                        <TextBlock Text="{Binding Name}" FontWeight="SemiBold" FontSize="14" />
+                                                        <TextBlock Text="{Binding Description}" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" MaxLines="2" />
+                                                        <StackPanel Orientation="Horizontal" Spacing="4">
+                                                            <Border Background="{ThemeResource SystemFillColorSuccessBrush}" CornerRadius="4" Padding="6,2" Visibility="{Binding IsEncoder, Converter={StaticResource BoolToVisibilityConverter}}">
+                                                                <TextBlock Text="编码" FontSize="11" Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" />
+                                                            </Border>
+                                                            <Border Background="{ThemeResource SystemFillColorCautionBrush}" CornerRadius="4" Padding="6,2" Visibility="{Binding IsDecoder, Converter={StaticResource BoolToVisibilityConverter}}">
+                                                                <TextBlock Text="解码" FontSize="11" Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" />
+                                                            </Border>
+                                                        </StackPanel>
+                                                    </StackPanel>
+                                                </Border>
+                                            </DataTemplate>
+                                        </ItemsRepeater.ItemTemplate>
+                                    </ItemsRepeater>
+                                </Expander>
+                                
+                                <!-- VP9 -->
+                                <Expander Header="VP9" IsExpanded="True">
+                                    <ItemsRepeater ItemsSource="{Binding Vp9VideoCodecs}">
+                                        <ItemsRepeater.Layout>
+                                            <UniformGridLayout MinItemWidth="280" MinItemHeight="100" MinColumnSpacing="12" MinRowSpacing="12" />
+                                        </ItemsRepeater.Layout>
+                                        <ItemsRepeater.ItemTemplate>
+                                            <DataTemplate>
+                                                <Border BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Padding="12" Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}">
+                                                    <StackPanel Spacing="6">
+                                                        <TextBlock Text="{Binding Name}" FontWeight="SemiBold" FontSize="14" />
+                                                        <TextBlock Text="{Binding Description}" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" MaxLines="2" />
+                                                        <StackPanel Orientation="Horizontal" Spacing="4">
+                                                            <Border Background="{ThemeResource SystemFillColorSuccessBrush}" CornerRadius="4" Padding="6,2" Visibility="{Binding IsEncoder, Converter={StaticResource BoolToVisibilityConverter}}">
+                                                                <TextBlock Text="编码" FontSize="11" Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" />
+                                                            </Border>
+                                                            <Border Background="{ThemeResource SystemFillColorCautionBrush}" CornerRadius="4" Padding="6,2" Visibility="{Binding IsDecoder, Converter={StaticResource BoolToVisibilityConverter}}">
+                                                                <TextBlock Text="解码" FontSize="11" Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" />
+                                                            </Border>
+                                                        </StackPanel>
+                                                    </StackPanel>
+                                                </Border>
+                                            </DataTemplate>
+                                        </ItemsRepeater.ItemTemplate>
+                                    </ItemsRepeater>
+                                </Expander>
+                                
+                                <!-- 其他视频编解码器 -->
+                                <Expander Header="其他视频编解码器" IsExpanded="False">
+                                    <ItemsRepeater ItemsSource="{Binding OtherVideoCodecs}">
+                                        <ItemsRepeater.Layout>
+                                            <UniformGridLayout MinItemWidth="280" MinItemHeight="100" MinColumnSpacing="12" MinRowSpacing="12" />
+                                        </ItemsRepeater.Layout>
+                                        <ItemsRepeater.ItemTemplate>
+                                            <DataTemplate>
+                                                <Border BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Padding="12" Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}">
+                                                    <StackPanel Spacing="6">
+                                                        <TextBlock Text="{Binding Name}" FontWeight="SemiBold" FontSize="14" />
+                                                        <TextBlock Text="{Binding Description}" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" MaxLines="2" />
+                                                        <StackPanel Orientation="Horizontal" Spacing="4">
+                                                            <Border Background="{ThemeResource SystemFillColorSuccessBrush}" CornerRadius="4" Padding="6,2" Visibility="{Binding IsEncoder, Converter={StaticResource BoolToVisibilityConverter}}">
+                                                                <TextBlock Text="编码" FontSize="11" Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" />
+                                                            </Border>
+                                                            <Border Background="{ThemeResource SystemFillColorCautionBrush}" CornerRadius="4" Padding="6,2" Visibility="{Binding IsDecoder, Converter={StaticResource BoolToVisibilityConverter}}">
+                                                                <TextBlock Text="解码" FontSize="11" Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" />
+                                                            </Border>
+                                                        </StackPanel>
+                                                    </StackPanel>
+                                                </Border>
+                                            </DataTemplate>
+                                        </ItemsRepeater.ItemTemplate>
+                                    </ItemsRepeater>
+                                </Expander>
+                            </StackPanel>
                         </StackPanel>
 
                         <!-- 音频编解码器 -->
@@ -123,61 +292,198 @@
                                 <TextBlock Text="音频编解码器" FontWeight="SemiBold" FontSize="16" />
                                 <TextBlock Text="{Binding AudioCodecs.Count, Mode=OneWay}" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" />
                             </StackPanel>
-                            <ItemsRepeater ItemsSource="{Binding AudioCodecs}">
-                                <ItemsRepeater.Layout>
-                                    <UniformGridLayout MinItemWidth="280" MinItemHeight="100" MinColumnSpacing="12" MinRowSpacing="12" />
-                                </ItemsRepeater.Layout>
-                                <ItemsRepeater.ItemTemplate>
-                                    <DataTemplate>
-                                        <Border BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Padding="12" Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}">
-                                            <StackPanel Spacing="6">
-                                                <TextBlock Text="{Binding Name}" FontWeight="SemiBold" FontSize="14" />
-                                                <TextBlock Text="{Binding Description}" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" MaxLines="2" />
-                                                <StackPanel Orientation="Horizontal" Spacing="4">
-                                                    <Border Background="{ThemeResource SystemFillColorSuccessBrush}" CornerRadius="4" Padding="6,2" Visibility="{Binding IsEncoder, Converter={StaticResource BoolToVisibilityConverter}}">
-                                                        <TextBlock Text="编码" FontSize="11" Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" />
-                                                    </Border>
-                                                    <Border Background="{ThemeResource SystemFillColorCautionBrush}" CornerRadius="4" Padding="6,2" Visibility="{Binding IsDecoder, Converter={StaticResource BoolToVisibilityConverter}}">
-                                                        <TextBlock Text="解码" FontSize="11" Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" />
-                                                    </Border>
-                                                </StackPanel>
-                                            </StackPanel>
-                                        </Border>
-                                    </DataTemplate>
-                                </ItemsRepeater.ItemTemplate>
-                            </ItemsRepeater>
-                        </StackPanel>
-
-                        <!-- 字幕编解码器 -->
-                        <StackPanel Spacing="8">
-                            <StackPanel Orientation="Horizontal" Spacing="8">
-                                <SymbolIcon Symbol="Caption" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
-                                <TextBlock Text="字幕编解码器" FontWeight="SemiBold" FontSize="16" />
-                                <TextBlock Text="{Binding SubtitleCodecs.Count, Mode=OneWay}" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" />
+                            
+                            <!-- 常见音频编码类别 -->
+                            <StackPanel Spacing="12">
+                                <!-- MP3 -->
+                                <Expander Header="MP3" IsExpanded="True">
+                                    <ItemsRepeater ItemsSource="{Binding Mp3AudioCodecs}">
+                                        <ItemsRepeater.Layout>
+                                            <UniformGridLayout MinItemWidth="280" MinItemHeight="100" MinColumnSpacing="12" MinRowSpacing="12" />
+                                        </ItemsRepeater.Layout>
+                                        <ItemsRepeater.ItemTemplate>
+                                            <DataTemplate>
+                                                <Border BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Padding="12" Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}">
+                                                    <StackPanel Spacing="6">
+                                                        <TextBlock Text="{Binding Name}" FontWeight="SemiBold" FontSize="14" />
+                                                        <TextBlock Text="{Binding Description}" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" MaxLines="2" />
+                                                        <StackPanel Orientation="Horizontal" Spacing="4">
+                                                            <Border Background="{ThemeResource SystemFillColorSuccessBrush}" CornerRadius="4" Padding="6,2" Visibility="{Binding IsEncoder, Converter={StaticResource BoolToVisibilityConverter}}">
+                                                                <TextBlock Text="编码" FontSize="11" Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" />
+                                                            </Border>
+                                                            <Border Background="{ThemeResource SystemFillColorCautionBrush}" CornerRadius="4" Padding="6,2" Visibility="{Binding IsDecoder, Converter={StaticResource BoolToVisibilityConverter}}">
+                                                                <TextBlock Text="解码" FontSize="11" Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" />
+                                                            </Border>
+                                                        </StackPanel>
+                                                    </StackPanel>
+                                                </Border>
+                                            </DataTemplate>
+                                        </ItemsRepeater.ItemTemplate>
+                                    </ItemsRepeater>
+                                </Expander>
+                                
+                                <!-- MP2 -->
+                                <Expander Header="MP2" IsExpanded="True">
+                                    <ItemsRepeater ItemsSource="{Binding Mp2AudioCodecs}">
+                                        <ItemsRepeater.Layout>
+                                            <UniformGridLayout MinItemWidth="280" MinItemHeight="100" MinColumnSpacing="12" MinRowSpacing="12" />
+                                        </ItemsRepeater.Layout>
+                                        <ItemsRepeater.ItemTemplate>
+                                            <DataTemplate>
+                                                <Border BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Padding="12" Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}">
+                                                    <StackPanel Spacing="6">
+                                                        <TextBlock Text="{Binding Name}" FontWeight="SemiBold" FontSize="14" />
+                                                        <TextBlock Text="{Binding Description}" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" MaxLines="2" />
+                                                        <StackPanel Orientation="Horizontal" Spacing="4">
+                                                            <Border Background="{ThemeResource SystemFillColorSuccessBrush}" CornerRadius="4" Padding="6,2" Visibility="{Binding IsEncoder, Converter={StaticResource BoolToVisibilityConverter}}">
+                                                                <TextBlock Text="编码" FontSize="11" Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" />
+                                                            </Border>
+                                                            <Border Background="{ThemeResource SystemFillColorCautionBrush}" CornerRadius="4" Padding="6,2" Visibility="{Binding IsDecoder, Converter={StaticResource BoolToVisibilityConverter}}">
+                                                                <TextBlock Text="解码" FontSize="11" Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" />
+                                                            </Border>
+                                                        </StackPanel>
+                                                    </StackPanel>
+                                                </Border>
+                                            </DataTemplate>
+                                        </ItemsRepeater.ItemTemplate>
+                                    </ItemsRepeater>
+                                </Expander>
+                                
+                                <!-- AAC -->
+                                <Expander Header="AAC" IsExpanded="True">
+                                    <ItemsRepeater ItemsSource="{Binding AacAudioCodecs}">
+                                        <ItemsRepeater.Layout>
+                                            <UniformGridLayout MinItemWidth="280" MinItemHeight="100" MinColumnSpacing="12" MinRowSpacing="12" />
+                                        </ItemsRepeater.Layout>
+                                        <ItemsRepeater.ItemTemplate>
+                                            <DataTemplate>
+                                                <Border BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Padding="12" Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}">
+                                                    <StackPanel Spacing="6">
+                                                        <TextBlock Text="{Binding Name}" FontWeight="SemiBold" FontSize="14" />
+                                                        <TextBlock Text="{Binding Description}" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" MaxLines="2" />
+                                                        <StackPanel Orientation="Horizontal" Spacing="4">
+                                                            <Border Background="{ThemeResource SystemFillColorSuccessBrush}" CornerRadius="4" Padding="6,2" Visibility="{Binding IsEncoder, Converter={StaticResource BoolToVisibilityConverter}}">
+                                                                <TextBlock Text="编码" FontSize="11" Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" />
+                                                            </Border>
+                                                            <Border Background="{ThemeResource SystemFillColorCautionBrush}" CornerRadius="4" Padding="6,2" Visibility="{Binding IsDecoder, Converter={StaticResource BoolToVisibilityConverter}}">
+                                                                <TextBlock Text="解码" FontSize="11" Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" />
+                                                            </Border>
+                                                        </StackPanel>
+                                                    </StackPanel>
+                                                </Border>
+                                            </DataTemplate>
+                                        </ItemsRepeater.ItemTemplate>
+                                    </ItemsRepeater>
+                                </Expander>
+                                
+                                <!-- AC3 -->
+                                <Expander Header="AC3" IsExpanded="True">
+                                    <ItemsRepeater ItemsSource="{Binding Ac3AudioCodecs}">
+                                        <ItemsRepeater.Layout>
+                                            <UniformGridLayout MinItemWidth="280" MinItemHeight="100" MinColumnSpacing="12" MinRowSpacing="12" />
+                                        </ItemsRepeater.Layout>
+                                        <ItemsRepeater.ItemTemplate>
+                                            <DataTemplate>
+                                                <Border BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Padding="12" Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}">
+                                                    <StackPanel Spacing="6">
+                                                        <TextBlock Text="{Binding Name}" FontWeight="SemiBold" FontSize="14" />
+                                                        <TextBlock Text="{Binding Description}" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" MaxLines="2" />
+                                                        <StackPanel Orientation="Horizontal" Spacing="4">
+                                                            <Border Background="{ThemeResource SystemFillColorSuccessBrush}" CornerRadius="4" Padding="6,2" Visibility="{Binding IsEncoder, Converter={StaticResource BoolToVisibilityConverter}}">
+                                                                <TextBlock Text="编码" FontSize="11" Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" />
+                                                            </Border>
+                                                            <Border Background="{ThemeResource SystemFillColorCautionBrush}" CornerRadius="4" Padding="6,2" Visibility="{Binding IsDecoder, Converter={StaticResource BoolToVisibilityConverter}}">
+                                                                <TextBlock Text="解码" FontSize="11" Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" />
+                                                            </Border>
+                                                        </StackPanel>
+                                                    </StackPanel>
+                                                </Border>
+                                            </DataTemplate>
+                                        </ItemsRepeater.ItemTemplate>
+                                    </ItemsRepeater>
+                                </Expander>
+                                
+                                <!-- FLAC -->
+                                <Expander Header="FLAC" IsExpanded="True">
+                                    <ItemsRepeater ItemsSource="{Binding FlacAudioCodecs}">
+                                        <ItemsRepeater.Layout>
+                                            <UniformGridLayout MinItemWidth="280" MinItemHeight="100" MinColumnSpacing="12" MinRowSpacing="12" />
+                                        </ItemsRepeater.Layout>
+                                        <ItemsRepeater.ItemTemplate>
+                                            <DataTemplate>
+                                                <Border BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Padding="12" Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}">
+                                                    <StackPanel Spacing="6">
+                                                        <TextBlock Text="{Binding Name}" FontWeight="SemiBold" FontSize="14" />
+                                                        <TextBlock Text="{Binding Description}" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" MaxLines="2" />
+                                                        <StackPanel Orientation="Horizontal" Spacing="4">
+                                                            <Border Background="{ThemeResource SystemFillColorSuccessBrush}" CornerRadius="4" Padding="6,2" Visibility="{Binding IsEncoder, Converter={StaticResource BoolToVisibilityConverter}}">
+                                                                <TextBlock Text="编码" FontSize="11" Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" />
+                                                            </Border>
+                                                            <Border Background="{ThemeResource SystemFillColorCautionBrush}" CornerRadius="4" Padding="6,2" Visibility="{Binding IsDecoder, Converter={StaticResource BoolToVisibilityConverter}}">
+                                                                <TextBlock Text="解码" FontSize="11" Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" />
+                                                            </Border>
+                                                        </StackPanel>
+                                                    </StackPanel>
+                                                </Border>
+                                            </DataTemplate>
+                                        </ItemsRepeater.ItemTemplate>
+                                    </ItemsRepeater>
+                                </Expander>
+                                
+                                <!-- PCM -->
+                                <Expander Header="PCM" IsExpanded="True">
+                                    <ItemsRepeater ItemsSource="{Binding PcmAudioCodecs}">
+                                        <ItemsRepeater.Layout>
+                                            <UniformGridLayout MinItemWidth="280" MinItemHeight="100" MinColumnSpacing="12" MinRowSpacing="12" />
+                                        </ItemsRepeater.Layout>
+                                        <ItemsRepeater.ItemTemplate>
+                                            <DataTemplate>
+                                                <Border BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Padding="12" Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}">
+                                                    <StackPanel Spacing="6">
+                                                        <TextBlock Text="{Binding Name}" FontWeight="SemiBold" FontSize="14" />
+                                                        <TextBlock Text="{Binding Description}" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" MaxLines="2" />
+                                                        <StackPanel Orientation="Horizontal" Spacing="4">
+                                                            <Border Background="{ThemeResource SystemFillColorSuccessBrush}" CornerRadius="4" Padding="6,2" Visibility="{Binding IsEncoder, Converter={StaticResource BoolToVisibilityConverter}}">
+                                                                <TextBlock Text="编码" FontSize="11" Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" />
+                                                            </Border>
+                                                            <Border Background="{ThemeResource SystemFillColorCautionBrush}" CornerRadius="4" Padding="6,2" Visibility="{Binding IsDecoder, Converter={StaticResource BoolToVisibilityConverter}}">
+                                                                <TextBlock Text="解码" FontSize="11" Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" />
+                                                            </Border>
+                                                        </StackPanel>
+                                                    </StackPanel>
+                                                </Border>
+                                            </DataTemplate>
+                                        </ItemsRepeater.ItemTemplate>
+                                    </ItemsRepeater>
+                                </Expander>
+                                
+                                <!-- 其他音频编解码器 -->
+                                <Expander Header="其他音频编解码器" IsExpanded="False">
+                                    <ItemsRepeater ItemsSource="{Binding OtherAudioCodecs}">
+                                        <ItemsRepeater.Layout>
+                                            <UniformGridLayout MinItemWidth="280" MinItemHeight="100" MinColumnSpacing="12" MinRowSpacing="12" />
+                                        </ItemsRepeater.Layout>
+                                        <ItemsRepeater.ItemTemplate>
+                                            <DataTemplate>
+                                                <Border BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Padding="12" Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}">
+                                                    <StackPanel Spacing="6">
+                                                        <TextBlock Text="{Binding Name}" FontWeight="SemiBold" FontSize="14" />
+                                                        <TextBlock Text="{Binding Description}" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" MaxLines="2" />
+                                                        <StackPanel Orientation="Horizontal" Spacing="4">
+                                                            <Border Background="{ThemeResource SystemFillColorSuccessBrush}" CornerRadius="4" Padding="6,2" Visibility="{Binding IsEncoder, Converter={StaticResource BoolToVisibilityConverter}}">
+                                                                <TextBlock Text="编码" FontSize="11" Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" />
+                                                            </Border>
+                                                            <Border Background="{ThemeResource SystemFillColorCautionBrush}" CornerRadius="4" Padding="6,2" Visibility="{Binding IsDecoder, Converter={StaticResource BoolToVisibilityConverter}}">
+                                                                <TextBlock Text="解码" FontSize="11" Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" />
+                                                            </Border>
+                                                        </StackPanel>
+                                                    </StackPanel>
+                                                </Border>
+                                            </DataTemplate>
+                                        </ItemsRepeater.ItemTemplate>
+                                    </ItemsRepeater>
+                                </Expander>
                             </StackPanel>
-                            <ItemsRepeater ItemsSource="{Binding SubtitleCodecs}">
-                                <ItemsRepeater.Layout>
-                                    <UniformGridLayout MinItemWidth="280" MinItemHeight="100" MinColumnSpacing="12" MinRowSpacing="12" />
-                                </ItemsRepeater.Layout>
-                                <ItemsRepeater.ItemTemplate>
-                                    <DataTemplate>
-                                        <Border BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Padding="12" Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}">
-                                            <StackPanel Spacing="6">
-                                                <TextBlock Text="{Binding Name}" FontWeight="SemiBold" FontSize="14" />
-                                                <TextBlock Text="{Binding Description}" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" MaxLines="2" />
-                                                <StackPanel Orientation="Horizontal" Spacing="4">
-                                                    <Border Background="{ThemeResource SystemFillColorSuccessBrush}" CornerRadius="4" Padding="6,2" Visibility="{Binding IsEncoder, Converter={StaticResource BoolToVisibilityConverter}}">
-                                                        <TextBlock Text="编码" FontSize="11" Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" />
-                                                    </Border>
-                                                    <Border Background="{ThemeResource SystemFillColorCautionBrush}" CornerRadius="4" Padding="6,2" Visibility="{Binding IsDecoder, Converter={StaticResource BoolToVisibilityConverter}}">
-                                                        <TextBlock Text="解码" FontSize="11" Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" />
-                                                    </Border>
-                                                </StackPanel>
-                                            </StackPanel>
-                                        </Border>
-                                    </DataTemplate>
-                                </ItemsRepeater.ItemTemplate>
-                            </ItemsRepeater>
                         </StackPanel>
                     </StackPanel>
                 </StackPanel>
