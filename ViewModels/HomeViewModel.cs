@@ -52,6 +52,24 @@ namespace FFmpegStudio.ViewModels
         public ObservableCollection<CodecInfo> SubtitleCodecs { get; } = new();
         public ObservableCollection<CodecInfo> OtherCodecs { get; } = new();
 
+        // Video codec categories
+        public ObservableCollection<CodecInfo> H264VideoCodecs { get; } = new();
+        public ObservableCollection<CodecInfo> HevcVideoCodecs { get; } = new();
+        public ObservableCollection<CodecInfo> Av1VideoCodecs { get; } = new();
+        public ObservableCollection<CodecInfo> Mpeg4VideoCodecs { get; } = new();
+        public ObservableCollection<CodecInfo> QuickTimeVideoCodecs { get; } = new();
+        public ObservableCollection<CodecInfo> Vp9VideoCodecs { get; } = new();
+        public ObservableCollection<CodecInfo> OtherVideoCodecs { get; } = new();
+
+        // Audio codec categories
+        public ObservableCollection<CodecInfo> Mp3AudioCodecs { get; } = new();
+        public ObservableCollection<CodecInfo> Mp2AudioCodecs { get; } = new();
+        public ObservableCollection<CodecInfo> AacAudioCodecs { get; } = new();
+        public ObservableCollection<CodecInfo> Ac3AudioCodecs { get; } = new();
+        public ObservableCollection<CodecInfo> FlacAudioCodecs { get; } = new();
+        public ObservableCollection<CodecInfo> PcmAudioCodecs { get; } = new();
+        public ObservableCollection<CodecInfo> OtherAudioCodecs { get; } = new();
+
         public HomeViewModel()
         {
             LoadFFmpegVersionAsync();
@@ -280,6 +298,23 @@ namespace FFmpegStudio.ViewModels
                 SubtitleCodecs.Clear();
                 OtherCodecs.Clear();
 
+                // Clear categorized collections
+                H264VideoCodecs.Clear();
+                HevcVideoCodecs.Clear();
+                Av1VideoCodecs.Clear();
+                Mpeg4VideoCodecs.Clear();
+                QuickTimeVideoCodecs.Clear();
+                Vp9VideoCodecs.Clear();
+                OtherVideoCodecs.Clear();
+
+                Mp3AudioCodecs.Clear();
+                Mp2AudioCodecs.Clear();
+                AacAudioCodecs.Clear();
+                Ac3AudioCodecs.Clear();
+                FlacAudioCodecs.Clear();
+                PcmAudioCodecs.Clear();
+                OtherAudioCodecs.Clear();
+
                 if (codecs.Count == 0)
                 {
                     CodecsErrorMessage = "未能获取编解码器信息，请检查 FFmpeg 是否正确安装。";
@@ -292,9 +327,11 @@ namespace FFmpegStudio.ViewModels
                         {
                             case "视频":
                                 VideoCodecs.Add(codec);
+                                CategorizeVideoCodec(codec);
                                 break;
                             case "音频":
                                 AudioCodecs.Add(codec);
+                                CategorizeAudioCodec(codec);
                                 break;
                             case "字幕":
                                 SubtitleCodecs.Add(codec);
@@ -313,6 +350,74 @@ namespace FFmpegStudio.ViewModels
             finally
             {
                 IsCodecsLoading = false;
+            }
+        }
+
+        private void CategorizeVideoCodec(CodecInfo codec)
+        {
+            var name = codec.Name?.ToLower() ?? string.Empty;
+
+            if (name.Contains("h264") || name.Contains("h.264") || name == "libx264")
+            {
+                H264VideoCodecs.Add(codec);
+            }
+            else if (name.Contains("hevc") || name.Contains("h265") || name.Contains("h.265") || name == "libx265")
+            {
+                HevcVideoCodecs.Add(codec);
+            }
+            else if (name.Contains("av1"))
+            {
+                Av1VideoCodecs.Add(codec);
+            }
+            else if (name.Contains("mpeg4"))
+            {
+                Mpeg4VideoCodecs.Add(codec);
+            }
+            else if (name.Contains("qtrle") || name.Contains("prores") || name.Contains("dnxhd"))
+            {
+                QuickTimeVideoCodecs.Add(codec);
+            }
+            else if (name.Contains("vp9") || name == "libvpx-vp9")
+            {
+                Vp9VideoCodecs.Add(codec);
+            }
+            else
+            {
+                OtherVideoCodecs.Add(codec);
+            }
+        }
+
+        private void CategorizeAudioCodec(CodecInfo codec)
+        {
+            var name = codec.Name?.ToLower() ?? string.Empty;
+
+            if (name.Contains("mp3") || name == "libmp3lame")
+            {
+                Mp3AudioCodecs.Add(codec);
+            }
+            else if (name.Contains("mp2"))
+            {
+                Mp2AudioCodecs.Add(codec);
+            }
+            else if (name.Contains("aac") || name == "aac")
+            {
+                AacAudioCodecs.Add(codec);
+            }
+            else if (name.Contains("ac3"))
+            {
+                Ac3AudioCodecs.Add(codec);
+            }
+            else if (name.Contains("flac"))
+            {
+                FlacAudioCodecs.Add(codec);
+            }
+            else if (name.Contains("pcm"))
+            {
+                PcmAudioCodecs.Add(codec);
+            }
+            else
+            {
+                OtherAudioCodecs.Add(codec);
             }
         }
     }

@@ -44,7 +44,7 @@
                             <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
                         <ComboBox ItemsSource="{Binding Formats}" SelectedItem="{Binding SelectedFormat, Mode=TwoWay}" Header="输出格式" />
-                        <TextBox Grid.Column="1" PlaceholderText="1=每帧提取, 2=每2帧提取" Text="{Binding FrameInterval, Mode=TwoWay}" Header="帧提取间隔" Visibility="{Binding ShowAdvanced, Converter={StaticResource BoolVisibilityConverter}}" />
+                        <TextBox Grid.Column="1" PlaceholderText="1=每帧提取, 2=每2帧提取" Text="{Binding FrameInterval, Mode=TwoWay}" Header="帧提取间隔" Visibility="{Binding ShowAdvanced, Converter={StaticResource BoolToVisibilityConverter}}" />
                     </Grid>
                 </StackPanel>
             </Border>
