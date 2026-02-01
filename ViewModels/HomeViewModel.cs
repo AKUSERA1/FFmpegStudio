@@ -1,4 +1,8 @@
+using System;
 using System.Collections.ObjectModel;
+using System.Collections.Generic;
+using System.Linq;
+using System.Diagnostics;
 using FFmpegStudio.Models;
 
 namespace FFmpegStudio.ViewModels
@@ -31,30 +35,199 @@ namespace FFmpegStudio.ViewModels
 
         public HomeViewModel()
         {
-            LoadMockData();
+            LoadHardwareInfo();
+            LoadCodecInfo();
         }
 
-        private void LoadMockData()
+        private void LoadHardwareInfo()
         {
-            // 模拟 FFmpeg 版本信息
-            FFmpegVersion = new FFmpegVersionInfo
-            {
-                Version = "未检测",
-                BuildDate = "-",
-                IsInstalled = false
-            };
+            var hardwareInfo = new HardwareInfo();
 
-            // 模拟硬件信息
-            HardwareInfo = new HardwareInfo
+            // Load CPU information
+            try
             {
-                CpuInfo = "Intel Core i7-10700K",
-                GpuInfo = "NVIDIA GeForce RTX 3080",
-                TotalMemory = 32 * 1024 * 1024 * 1024UL,
-                AvailableMemory = 16 * 1024 * 1024 * 1024UL,
-                CpuCoreCount = 8
-            };
+                var processorCount = Environment.ProcessorCount;
+                var cpuInfo = GetProcessorName();
+                hardwareInfo.CpuInfo = cpuInfo;
+                hardwareInfo.CpuCoreCount = processorCount;
+            }
+            catch
+            {
+                // CPU information failed to load, leave as null for "Unknown" display
+            }
 
-            // 模拟编解码器信息
+            // Load GPU information
+            try
+            {
+                var gpuInfoList = GetGpuInfo();
+                hardwareInfo.GpuInfoList = gpuInfoList;
+            }
+            catch
+            {
+                // GPU information failed to load, leave as empty for "Unknown" display
+            }
+
+            // Load memory information
+            try
+            {
+                var memInfo = GetMemoryInfo();
+                hardwareInfo.TotalMemory = memInfo.total;
+                hardwareInfo.AvailableMemory = memInfo.available;
+            }
+            catch
+            {
+                // Memory information failed to load
+            }
+
+            HardwareInfo = hardwareInfo;
+        }
+
+        private string GetProcessorName()
+        {
+            try
+            {
+                // Try reading from registry
+                var key = Microsoft.Win32.Registry.LocalMachine.OpenSubKey(@"HARDWARE\DESCRIPTION\System\CentralProcessor\0");
+                if (key != null)
+                {
+                    return key.GetValue("ProcessorNameString")?.ToString();
+                }
+            }
+            catch { }
+
+            return null;
+        }
+
+        private List<string> GetGpuInfo()
+        {
+            var gpuList = new List<string>();
+
+            try
+            {
+                // Try to get from registry
+                var key = Microsoft.Win32.Registry.LocalMachine.OpenSubKey(@"HARDWARE\DEVICEMAP\VIDEO");
+                if (key != null)
+                {
+                    var subKeyNames = key.GetSubKeyNames();
+                    foreach (var subKeyName in subKeyNames.Take(4)) // Limit to first 4 GPUs
+                    {
+                        var subKey = key.OpenSubKey(subKeyName);
+                        var description = subKey?.GetValue("Description")?.ToString();
+                        if (!string.IsNullOrEmpty(description))
+                        {
+                            gpuList.Add(description);
+                        }
+                    }
+                }
+            }
+            catch { }
+
+            // Fallback: try WMI through PowerShell
+            if (gpuList.Count == 0)
+            {
+                try
+                {
+                    var process = Process.Start(new ProcessStartInfo
+                    {
+                        FileName = "powershell.exe",
+                        Arguments = "-NoProfile -Command \"Get-WmiObject Win32_VideoController | Select-Object -ExpandProperty Name\"",
+                        UseShellExecute = false,
+                        RedirectStandardOutput = true,
+                        CreateNoWindow = true
+                    });
+
+                    if (process != null)
+                    {
+                        using (var reader = process.StandardOutput)
+                        {
+                            string line;
+                            while ((line = reader.ReadLine()) != null)
+                            {
+                                if (!string.IsNullOrWhiteSpace(line))
+                                {
+                                    gpuList.Add(line.Trim());
+                                }
+                            }
+                        }
+                        process.WaitForExit();
+                    }
+                }
+                catch { }
+            }
+
+            return gpuList;
+        }
+
+        private (ulong total, ulong available) GetMemoryInfo()
+        {
+            ulong totalSystemMemory = 0;
+            ulong availableMemory = 0;
+
+            try
+            {
+                // Get available memory using PowerShell
+                var process = Process.Start(new ProcessStartInfo
+                {
+                    FileName = "powershell.exe",
+                    Arguments = "-NoProfile -Command \"[Math]::Round((Get-WmiObject Win32_OperatingSystem).FreePhysicalMemory * 1024)\"",
+                    UseShellExecute = false,
+                    RedirectStandardOutput = true,
+                    CreateNoWindow = true
+                });
+
+                if (process != null)
+                {
+                    using (var reader = process.StandardOutput)
+                    {
+                        var output = reader.ReadToEnd().Trim();
+                        if (ulong.TryParse(output, out var available))
+                        {
+                            availableMemory = available;
+                        }
+                    }
+                    process.WaitForExit();
+                }
+            }
+            catch { }
+
+            try
+            {
+                // Get total memory using PowerShell
+                var process = Process.Start(new ProcessStartInfo
+                {
+                    FileName = "powershell.exe",
+                    Arguments = "-NoProfile -Command \"[Math]::Round((Get-WmiObject Win32_OperatingSystem).TotalVisibleMemorySize * 1024)\"",
+                    UseShellExecute = false,
+                    RedirectStandardOutput = true,
+                    CreateNoWindow = true
+                });
+
+                if (process != null)
+                {
+                    using (var reader = process.StandardOutput)
+                    {
+                        var output = reader.ReadToEnd().Trim();
+                        if (ulong.TryParse(output, out var total))
+                        {
+                            totalSystemMemory = total;
+                        }
+                    }
+                    process.WaitForExit();
+                }
+            }
+            catch { }
+
+            // Fallback: use default if unable to detect
+            if (totalSystemMemory == 0)
+            {
+                totalSystemMemory = 8UL * 1024 * 1024 * 1024; // 8GB default
+            }
+
+            return (totalSystemMemory, availableMemory);
+        }
+
+        private void LoadCodecInfo()
+        {
             var codecs = new[]
             {
                 new CodecInfo { Name = "H.264", Description = "H.264 / AVC / MPEG-4 AVC", Category = "视频", IsEncoder = true, IsDecoder = true },

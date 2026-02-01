@@ -45,7 +45,7 @@
                                 <SymbolIcon Symbol="Manage" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
                                 <TextBlock Text="处理器" FontWeight="SemiBold" />
                             </StackPanel>
-                            <TextBlock Text="{Binding HardwareInfo.CpuInfo}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
+                            <TextBlock Text="{Binding HardwareInfo.CpuInfoDisplay}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
                             <TextBlock Text="{Binding HardwareInfo.CpuCoreCount}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" />
                         </StackPanel>
                         <StackPanel Grid.Column="1" Spacing="8">
@@ -53,7 +53,7 @@
                                 <SymbolIcon Symbol="ViewAll" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
                                 <TextBlock Text="显卡" FontWeight="SemiBold" />
                             </StackPanel>
-                            <TextBlock Text="{Binding HardwareInfo.GpuInfo}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
+                            <TextBlock Text="{Binding HardwareInfo.GpuInfoDisplay}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
                         </StackPanel>
                         <StackPanel Grid.Column="2" Spacing="8">
                             <StackPanel Orientation="Horizontal" Spacing="4">
