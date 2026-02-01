@@ -11,6 +11,8 @@ namespace FFmpegStudio.Models
         public ulong TotalMemory { get; set; }
         public ulong AvailableMemory { get; set; }
         public int CpuCoreCount { get; set; }
+        
+        public string CpuCoreCountDisplay => $"CPU内核数：{CpuCoreCount}";
 
         public string CpuInfoDisplay => string.IsNullOrEmpty(CpuInfo) ? "δ֪" : CpuInfo;
         public string GpuInfoDisplay => GpuInfoList.Count > 0 ? string.Join("\n", GpuInfoList.Select((gpu, i) => $"GPU{i}: {gpu}")) : "δ֪";

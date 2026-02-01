@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Diagnostics;
 using FFmpegStudio.Models;
+using FFmpegStudio.Services;
 
 namespace FFmpegStudio.ViewModels
 {
@@ -35,8 +36,28 @@ namespace FFmpegStudio.ViewModels
 
         public HomeViewModel()
         {
+            LoadFFmpegVersionAsync();
             LoadHardwareInfo();
             LoadCodecInfo();
+        }
+
+        private async void LoadFFmpegVersionAsync()
+        {
+            try
+            {
+                var ffmpegService = FFmpegService.Instance;
+                var versionInfo = await ffmpegService.GetFFmpegVersionAsync();
+                FFmpegVersion = versionInfo;
+            }
+            catch
+            {
+                FFmpegVersion = new FFmpegVersionInfo
+                {
+                    Version = "Î´¼ì²â",
+                    BuildDate = "-",
+                    IsInstalled = false
+                };
+            }
         }
 
         private void LoadHardwareInfo()

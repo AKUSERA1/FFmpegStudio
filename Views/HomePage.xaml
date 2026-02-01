@@ -27,7 +27,7 @@
                         <TextBlock Grid.Column="2" Text="构建日期:" VerticalAlignment="Center" />
                         <TextBlock Grid.Column="3" Text="{Binding FFmpegVersion.BuildDate}" VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                     </Grid>
-                    <InfoBar IsOpen="{Binding FFmpegVersion.IsInstalled, Converter={StaticResource NegativeBoolConverter}}" Title="警告" Message="未检测到 FFmpeg，请先安装 FFmpeg · 推荐使用 WinGet 安装" Severity="Warning" IsClosable="False" />
+                    <InfoBar IsOpen="{Binding FFmpegVersion.IsInstalled, Converter={StaticResource NegativeBoolConverter}}" Title="警告" Message="未检测到 FFmpeg · 到设置指定或安装FFmpeg" Severity="Warning" IsClosable="False" />
                 </StackPanel>
             </Border>
 
@@ -46,7 +46,7 @@
                                 <TextBlock Text="处理器" FontWeight="SemiBold" />
                             </StackPanel>
                             <TextBlock Text="{Binding HardwareInfo.CpuInfoDisplay}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
-                            <TextBlock Text="{Binding HardwareInfo.CpuCoreCount}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" />
+                            <TextBlock Text="{Binding HardwareInfo.CpuCoreCountDisplay}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" />
                         </StackPanel>
                         <StackPanel Grid.Column="1" Spacing="8">
                             <StackPanel Orientation="Horizontal" Spacing="4">
