@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Window
+    x:Class="FFmpegStudio.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:FFmpegStudio"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Title="FFmpeg Studio">
+
+    <Window.SystemBackdrop>
+        <MicaBackdrop />
+    </Window.SystemBackdrop>
+
+    <Grid>
+        <NavigationView
+            x:Name="NavView"
+            IsBackButtonVisible="Collapsed"
+            IsPaneToggleButtonVisible="True"
+            IsSettingsVisible="True"
+            ItemInvoked="NavView_ItemInvoked"
+            SelectionFollowsFocus="Enabled"
+            PaneDisplayMode="Left">
+            <NavigationView.MenuItems>
+                <NavigationViewItem Content="首页" Icon="Home" Tag="home" />
+                <NavigationViewItem Content="视频转码" Icon="Video" Tag="transcode" />
+                <NavigationViewItem Content="帧序列合成" Icon="Pictures" Tag="framesynth" />
+                <NavigationViewItem Content="视频拆解" Icon="Trim" Tag="videoextract" />
+                <NavigationViewItem Content="帧序列工具" Icon="Setting" Tag="frametool" />
+            </NavigationView.MenuItems>
+
+            <Frame x:Name="ContentFrame" Navigated="ContentFrame_Navigated" />
+        </NavigationView>
+    </Grid>
+</Window>

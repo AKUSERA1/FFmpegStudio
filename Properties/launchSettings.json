@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "FFmpegStudio (Package)": {
+      "commandName": "MsixPackage"
+    },
+    "FFmpegStudio (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}

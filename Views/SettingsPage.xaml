@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="FFmpegStudio.Views.SettingsPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+
+    <ScrollViewer>
+        <StackPanel Padding="20" Spacing="20">
+            <TextBlock Text="设置" FontSize="32" FontWeight="Bold" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
+
+            <Border BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Padding="20" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
+                <StackPanel Spacing="12">
+                    <TextBlock Text="FFmpeg 配置" FontSize="18" FontWeight="SemiBold" />
+                    <Grid ColumnSpacing="12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <TextBox PlaceholderText="选择 FFmpeg 可执行文件路径..." Text="{Binding FFmpegPath, Mode=TwoWay}" IsReadOnly="True" />
+                        <Button Grid.Column="1" Content="浏览" CornerRadius="4" Command="{Binding BrowseFFmpegCommand}" />
+                    </Grid>
+                    <InfoBar IsOpen="{Binding IsFFmpegInstalled}" Title="状态" Message="FFmpeg 已安装" Severity="Success" IsClosable="False" Margin="0,8,0,0" />
+                    <InfoBar IsOpen="{Binding IsFFmpegInstalled, Converter={StaticResource NegativeBoolConverter}}" Title="状态" Message="FFmpeg 未安装" Severity="Warning" IsClosable="False" Margin="0,8,0,0" />
+                </StackPanel>
+            </Border>
+
+            <Border BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Padding="20" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
+                <StackPanel Spacing="12">
+                    <TextBlock Text="WinGet 安装 FFmpeg" FontSize="18" FontWeight="SemiBold" />
+                    <TextBlock Text="使用 WinGet 包管理器自动安装 FFmpeg" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                    <Button Content="通过 WinGet 安装 FFmpeg" Style="{ThemeResource AccentButtonStyle}" Command="{Binding InstallFFmpegWithWinGetCommand}" />
+                    <ProgressBar IsIndeterminate="{Binding IsInstallingFFmpeg}" Visibility="{Binding IsInstallingFFmpeg, Converter={StaticResource BoolVisibilityConverter}}" Margin="0,8,0,0" />
+                    <TextBlock Text="{Binding InstallationStatus}" Visibility="{Binding ShowInstallationStatus, Converter={StaticResource BoolVisibilityConverter}}" Margin="0,8,0,0" />
+                </StackPanel>
+            </Border>
+
+            <Border BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Padding="20" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
+                <StackPanel Spacing="12">
+                    <TextBlock Text="高级选项" FontSize="18" FontWeight="SemiBold" />
+                    <StackPanel Orientation="Horizontal" Spacing="12">
+                        <ToggleSwitch IsOn="{Binding ShowAdvanced, Mode=TwoWay}" Header="启用高级功能" />
+                    </StackPanel>
+                    <TextBlock Text="启用后，所有页面将显示高级功能选项" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" />
+                </StackPanel>
+            </Border>
+
+            <Border BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Padding="20" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
+                <StackPanel Spacing="12">
+                    <TextBlock Text="关于" FontSize="18" FontWeight="SemiBold" />
+                    <TextBlock Text="FFmpeg Studio" FontSize="16" FontWeight="SemiBold" />
+                    <TextBlock Text="版本 1.0.0" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                    <TextBlock Text="一个基于 FFmpeg 的多媒体处理工具" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                </StackPanel>
+            </Border>
+        </StackPanel>
+    </ScrollViewer>
+</Page>
