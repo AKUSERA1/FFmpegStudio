@@ -27,6 +27,7 @@ namespace FFmpegStudio.ViewModels
         private string _bitrate = "原始";
         private string _frameRate = "原始";
         private string _colorSpace = "BT.709";
+        private bool _isCommandManuallyEdited = false;
         private VideoInfo? _videoInfo;
         private bool _isLoadingVideoInfo;
         private bool _isLoadingEncoders;
@@ -51,6 +52,11 @@ namespace FFmpegStudio.ViewModels
                 {
                     OnPropertyChanged(nameof(HasSourceFile));
                     _ = LoadVideoInfoAsync();
+                    if (!_isCommandManuallyEdited)
+                    {
+                        // 源文件改变时，清空并重新构造命令
+                        ConstructFFmpegCommandAsync(true);
+                    }
                 }
             }
         }
@@ -85,7 +91,14 @@ namespace FFmpegStudio.ViewModels
         public string SelectedFormat
         {
             get => _selectedFormat;
-            set => SetProperty(ref _selectedFormat, value);
+            set
+            {
+                if (SetProperty(ref _selectedFormat, value) && !_isCommandManuallyEdited)
+                {
+                    // 容器改变时，局部更新命令
+                    ConstructFFmpegCommandAsync(false);
+                }
+            }
         }
 
         public string SelectedCodecCategory
@@ -103,25 +116,53 @@ namespace FFmpegStudio.ViewModels
         public string SelectedEncoder
         {
             get => _selectedEncoder;
-            set => SetProperty(ref _selectedEncoder, value);
+            set
+            {
+                if (SetProperty(ref _selectedEncoder, value) && !_isCommandManuallyEdited)
+                {
+                    // 编码器改变时，清空并重新构造命令
+                    ConstructFFmpegCommandAsync(true);
+                }
+            }
         }
 
         public string Resolution
         {
             get => _resolution;
-            set => SetProperty(ref _resolution, value);
+            set
+            {
+                if (SetProperty(ref _resolution, value) && !_isCommandManuallyEdited)
+                {
+                    // 分辨率改变时，局部更新命令
+                    ConstructFFmpegCommandAsync(false);
+                }
+            }
         }
 
         public string Bitrate
         {
             get => _bitrate;
-            set => SetProperty(ref _bitrate, value);
+            set
+            {
+                if (SetProperty(ref _bitrate, value) && !_isCommandManuallyEdited)
+                {
+                    // 比特率改变时，局部更新命令
+                    ConstructFFmpegCommandAsync(false);
+                }
+            }
         }
 
         public string FrameRate
         {
             get => _frameRate;
-            set => SetProperty(ref _frameRate, value);
+            set
+            {
+                if (SetProperty(ref _frameRate, value) && !_isCommandManuallyEdited)
+                {
+                    // 帧率改变时，局部更新命令
+                    ConstructFFmpegCommandAsync(false);
+                }
+            }
         }
 
         public bool ShowAdvanced
@@ -131,19 +172,25 @@ namespace FFmpegStudio.ViewModels
             {
                 _settingsService.ShowAdvancedFeatures = value;
                 OnPropertyChanged(nameof(ShowAdvanced));
+                if (!_isCommandManuallyEdited)
+                {
+                    // 高级开关改变时，局部更新命令
+                    ConstructFFmpegCommandAsync(false);
+                }
             }
         }
 
         public string ColorSpace
         {
             get => _colorSpace;
-            set => SetProperty(ref _colorSpace, value);
-        }
-
-        public string FFmpegCommand
-        {
-            get => _ffmpegCommand;
-            set => SetProperty(ref _ffmpegCommand, value);
+            set
+            {
+                if (SetProperty(ref _colorSpace, value) && !_isCommandManuallyEdited)
+                {
+                    // 色彩空间改变时，局部更新命令
+                    ConstructFFmpegCommandAsync(false);
+                }
+            }
         }
 
         public string SelectedQualityPreset
@@ -154,6 +201,33 @@ namespace FFmpegStudio.ViewModels
                 if (SetProperty(ref _selectedQualityPreset, value))
                 {
                     _ = LoadQualityPresetParamsAsync();
+                    if (!_isCommandManuallyEdited)
+                    {
+                        // 质量预设改变时，清空并重新构造命令
+                        ConstructFFmpegCommandAsync(true);
+                    }
+                }
+            }
+        }
+
+        public string FFmpegCommand
+        {
+            get => _ffmpegCommand;
+            set
+            {
+                if (SetProperty(ref _ffmpegCommand, value))
+                {
+                    // 用户手动编辑了命令
+                    _isCommandManuallyEdited = true;
+                    // 更新高级参数为"自定义"
+                    _resolution = "自定义";
+                    _bitrate = "自定义";
+                    _frameRate = "自定义";
+                    _colorSpace = "自定义";
+                    OnPropertyChanged(nameof(Resolution));
+                    OnPropertyChanged(nameof(Bitrate));
+                    OnPropertyChanged(nameof(FrameRate));
+                    OnPropertyChanged(nameof(ColorSpace));
                 }
             }
         }
@@ -273,6 +347,91 @@ namespace FFmpegStudio.ViewModels
                 XamlRoot = App.MainWindow.Content.XamlRoot
             };
             _ = dialog.ShowAsync();
+        }
+
+        private void ConstructFFmpegCommandAsync(bool rebuildFromScratch)
+        {
+            if (string.IsNullOrEmpty(SourceFilePath))
+            {
+                _ffmpegCommand = string.Empty;
+                OnPropertyChanged(nameof(FFmpegCommand));
+                return;
+            }
+
+            try
+            {
+                var outputPath = Path.ChangeExtension(SourceFilePath, "." + SelectedFormat.ToLower());
+                if (outputPath == SourceFilePath)
+                {
+                    outputPath = Path.Combine(Path.GetDirectoryName(SourceFilePath) ?? string.Empty,
+                        $"{Path.GetFileNameWithoutExtension(SourceFilePath)}_output.{SelectedFormat.ToLower()}");
+                }
+
+                var commandParts = new List<string>
+                {
+                    "ffmpeg",
+                    "-i",
+                    $"\"{SourceFilePath}\""
+                };
+
+                // 添加编码参数
+                commandParts.Add("-c:v");
+                commandParts.Add(SelectedEncoder);
+
+                // 添加质量预设参数
+                if (!string.IsNullOrEmpty(_qualityPresetParams))
+                {
+                    commandParts.AddRange(_qualityPresetParams.Split(' ', StringSplitOptions.RemoveEmptyEntries));
+                }
+
+                // 添加高级参数
+                if (ShowAdvanced)
+                {
+                    // 分辨率
+                    if (_resolution != "原始" && !string.IsNullOrEmpty(_resolution))
+                    {
+                        commandParts.Add("-s");
+                        commandParts.Add(_resolution);
+                    }
+
+                    // 比特率
+                    if (_bitrate != "原始" && !string.IsNullOrEmpty(_bitrate))
+                    {
+                        commandParts.Add("-b:v");
+                        commandParts.Add($"{_bitrate}k");
+                    }
+
+                    // 帧率
+                    if (_frameRate != "原始" && !string.IsNullOrEmpty(_frameRate))
+                    {
+                        commandParts.Add("-r");
+                        commandParts.Add(_frameRate);
+                    }
+
+                    // 色彩空间
+                    if (!string.IsNullOrEmpty(_colorSpace) && _colorSpace != "BT.709")
+                    {
+                        commandParts.Add("-colorspace");
+                        commandParts.Add(_colorSpace);
+                    }
+                }
+
+                // 音频编码（保持原始）
+                commandParts.Add("-c:a");
+                commandParts.Add("copy");
+
+                // 输出路径
+                commandParts.Add($"\"{outputPath}\"");
+
+                _ffmpegCommand = string.Join(' ', commandParts);
+                OnPropertyChanged(nameof(FFmpegCommand));
+            }
+            catch (Exception ex)
+            {
+                ShowErrorMessage($"构造FFmpeg命令时出错: {ex.Message}");
+                _ffmpegCommand = string.Empty;
+                OnPropertyChanged(nameof(FFmpegCommand));
+            }
         }
 
         private async Task BrowseFileAsync()
