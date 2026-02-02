@@ -1,0 +1,156 @@
+{
+  "h264_amf": {
+    "presets": {
+      "high": "-rc cqp -qp_i 18 -qp_p 18 -quality quality -pix_fmt p010le",
+      "medium": "-rc cqp -qp_i 23 -qp_p 23 -quality balanced -pix_fmt p010le",
+      "low": "-rc vbr -peak_bitrate 2M -quality speed -pix_fmt yuv420p"
+    }
+  },
+  "h264_mf": {
+    "presets": {
+      "high": "-rate_control vbr -quality 100 -pix_fmt p010le",
+      "medium": "-rate_control vbr -quality 70 -pix_fmt p010le",
+      "low": "-rate_control vbr -quality 40 -pix_fmt yuv420p"
+    }
+  },
+  "h264_nvenc": {
+    "presets": {
+      "high": "-rc vbr -cq 18 -preset p7 -pix_fmt p010le",
+      "medium": "-rc vbr -cq 23 -preset p4 -pix_fmt p010le",
+      "low": "-rc vbr -cq 28 -preset p1 -pix_fmt yuv420p"
+    }
+  },
+  "h264_qsv": {
+    "presets": {
+      "high": "-global_quality 18 -preset veryslow -pix_fmt p010le",
+      "medium": "-global_quality 23 -preset medium -pix_fmt p010le",
+      "low": "-global_quality 28 -preset veryfast -pix_fmt yuv420p"
+    }
+  },
+  "h264_vaapi": {
+    "presets": {
+      "high": "-qp 18 -pix_fmt p010le",
+      "medium": "-qp 23 -pix_fmt p010le",
+      "low": "-qp 28 -pix_fmt yuv420p"
+    }
+  },
+  "h264_vulkan": {
+    "presets": {
+      "high": "-qp 18 -pix_fmt yuv420p10le",
+      "medium": "-qp 23 -pix_fmt yuv420p10le",
+      "low": "-qp 28 -pix_fmt yuv420p"
+    }
+  },
+  "hevc_amf": {
+    "presets": {
+      "high": "-rc cqp -qp_i 18 -qp_p 18 -quality quality -pix_fmt p010le",
+      "medium": "-rc cqp -qp_i 23 -qp_p 23 -quality balanced -pix_fmt p010le",
+      "low": "-rc vbr -peak_bitrate 1.5M -quality speed -pix_fmt yuv420p"
+    }
+  },
+  "hevc_mf": {
+    "presets": {
+      "high": "-rate_control vbr -quality 100 -pix_fmt p010le",
+      "medium": "-rate_control vbr -quality 70 -pix_fmt p010le",
+      "low": "-rate_control vbr -quality 40 -pix_fmt yuv420p"
+    }
+  },
+  "hevc_nvenc": {
+    "presets": {
+      "high": "-rc vbr -cq 18 -preset p7 -pix_fmt p010le",
+      "medium": "-rc vbr -cq 23 -preset p4 -pix_fmt p010le",
+      "low": "-rc vbr -cq 28 -preset p1 -pix_fmt yuv420p"
+    }
+  },
+  "hevc_qsv": {
+    "presets": {
+      "high": "-global_quality 18 -preset veryslow -pix_fmt p010le",
+      "medium": "-global_quality 23 -preset medium -pix_fmt p010le",
+      "low": "-global_quality 28 -preset veryfast -pix_fmt yuv420p"
+    }
+  },
+  "hevc_vaapi": {
+    "presets": {
+      "high": "-qp 18 -pix_fmt p010le",
+      "medium": "-qp 23 -pix_fmt p010le",
+      "low": "-qp 28 -pix_fmt yuv420p"
+    }
+  },
+  "hevc_vulkan": {
+    "presets": {
+      "high": "-qp 18 -pix_fmt yuv420p10le",
+      "medium": "-qp 23 -pix_fmt yuv420p10le",
+      "low": "-qp 28 -pix_fmt yuv420p"
+    }
+  },
+  "hevc_d3d12va": {
+    "presets": {
+      "high": "-rc vbr -cq 18 -pix_fmt p010le",
+      "medium": "-rc vbr -cq 23 -pix_fmt p010le",
+      "low": "-rc vbr -cq 28 -pix_fmt yuv420p"
+    }
+  },
+  "av1_amf": {
+    "presets": {
+      "high": "-rc cqp -qp_i 18 -qp_p 18 -quality quality -pix_fmt p010le",
+      "medium": "-rc cqp -qp_i 23 -qp_p 23 -quality balanced -pix_fmt p010le",
+      "low": "-rc vbr -quality speed -pix_fmt yuv420p"
+    }
+  },
+  "av1_nvenc": {
+    "presets": {
+      "high": "-rc vbr -cq 20 -preset p7 -pix_fmt p010le",
+      "medium": "-rc vbr -cq 25 -preset p4 -pix_fmt p010le",
+      "low": "-rc vbr -cq 32 -preset p1 -pix_fmt yuv420p"
+    }
+  },
+  "av1_qsv": {
+    "presets": {
+      "high": "-global_quality 20 -preset veryslow -pix_fmt p010le",
+      "medium": "-global_quality 25 -preset medium -pix_fmt p010le",
+      "low": "-global_quality 32 -preset veryfast -pix_fmt yuv420p"
+    }
+  },
+  "av1_vaapi": {
+    "presets": {
+      "high": "-qp 20 -pix_fmt p010le",
+      "medium": "-qp 25 -pix_fmt p010le",
+      "low": "-qp 32 -pix_fmt yuv420p"
+    }
+  },
+  "libx264": {
+    "presets": {
+      "high": "-crf 18 -preset slow -pix_fmt yuv420p10le",
+      "medium": "-crf 23 -preset medium -pix_fmt yuv420p10le",
+      "low": "-crf 28 -preset fast -pix_fmt yuv420p"
+    }
+  },
+  "libx264rgb": {
+    "presets": {
+      "high": "-crf 0 -preset slow -pix_fmt gbrp10le",
+      "medium": "-crf 18 -preset medium -pix_fmt gbrp10le",
+      "low": "-crf 23 -preset fast -pix_fmt gbrp"
+    }
+  },
+  "libx265": {
+    "presets": {
+      "high": "-crf 18 -preset slow -pix_fmt yuv420p10le",
+      "medium": "-crf 23 -preset medium -pix_fmt yuv420p10le",
+      "low": "-crf 28 -preset fast -pix_fmt yuv420p"
+    }
+  },
+  "libxvid": {
+    "presets": {
+      "high": "-qscale:v 3 -pix_fmt yuv420p",
+      "medium": "-qscale:v 5 -pix_fmt yuv420p",
+      "low": "-qscale:v 9 -pix_fmt yuv420p"
+    }
+  },
+  "mpeg4": {
+    "presets": {
+      "high": "-qscale:v 3 -pix_fmt yuv420p",
+      "medium": "-qscale:v 5 -pix_fmt yuv420p",
+      "low": "-qscale:v 9 -pix_fmt yuv420p"
+    }
+  }
+}

@@ -1,10 +1,14 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using FFmpegStudio.Models;
 using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
 using Windows.Storage;
 using Windows.Storage.Pickers;
 
@@ -19,14 +23,16 @@ namespace FFmpegStudio.ViewModels
         private string _selectedFormat = "MP4";
         private string _selectedCodecCategory = "H.264";
         private string _selectedEncoder = "libx264";
-        private string _resolution = "1920x1080";
+        private string _resolution = "原始";
         private string _bitrate = "原始";
-        private string _frameRate = "30";
+        private string _frameRate = "原始";
         private string _colorSpace = "BT.709";
         private VideoInfo? _videoInfo;
         private bool _isLoadingVideoInfo;
         private bool _isLoadingEncoders;
         private string _ffmpegCommand = string.Empty;
+        private string _selectedQualityPreset = "medium";
+        private string _qualityPresetParams = string.Empty;
 
         public TranscodeViewModel()
         {
@@ -140,6 +146,26 @@ namespace FFmpegStudio.ViewModels
             set => SetProperty(ref _ffmpegCommand, value);
         }
 
+        public string SelectedQualityPreset
+        {
+            get => _selectedQualityPreset;
+            set
+            {
+                if (SetProperty(ref _selectedQualityPreset, value))
+                {
+                    _ = LoadQualityPresetParamsAsync();
+                }
+            }
+        }
+
+        public string QualityPresetParams
+        {
+            get => _qualityPresetParams;
+            set => SetProperty(ref _qualityPresetParams, value);
+        }
+
+        public ObservableCollection<string> QualityPresets { get; } = new() { "high", "medium", "low" };
+
         public ObservableCollection<string> Formats { get; } = new() { "MP4", "MKV", "AVI", "MOV", "FLV", "WebM" };
 
         public ObservableCollection<string> CodecCategories { get; } = new()
@@ -156,7 +182,7 @@ namespace FFmpegStudio.ViewModels
 
         public ObservableCollection<string> Resolutions { get; } = new() { "原始","1920x1080", "1080x1920", "2560x1440", "1440x2560" };
 
-        public ObservableCollection<string> FrameRates { get; } = new() { "25", "30", "60" };
+        public ObservableCollection<string> FrameRates { get; } = new() { "原始","25", "30", "60" };
 
         public ObservableCollection<string> ColorSpaces { get; } = new() { "BT.709", "BT.601", "BT.2020" };
 
@@ -179,12 +205,74 @@ namespace FFmpegStudio.ViewModels
                 if (Encoders.Count > 0)
                 {
                     SelectedEncoder = Encoders[0];
+                    _ = LoadQualityPresetParamsAsync();
                 }
             }
             finally
             {
                 IsLoadingEncoders = false;
             }
+        }
+
+        private async Task LoadQualityPresetParamsAsync()
+        {
+            if (string.IsNullOrEmpty(SelectedEncoder))
+                return;
+
+            try
+            {
+                var jsonPath = Path.Combine(AppContext.BaseDirectory, "Assets", "QualityPresets.json");
+                if (!File.Exists(jsonPath))
+                {
+                    ShowErrorMessage("QualityPresets.json 文件不存在");
+                    _qualityPresetParams = string.Empty;
+                    return;
+                }
+
+                var jsonContent = await File.ReadAllTextAsync(jsonPath);
+                var jsonDoc = JsonDocument.Parse(jsonContent);
+
+                if (!jsonDoc.RootElement.TryGetProperty(SelectedEncoder, out var encoderElement))
+                {
+                    ShowErrorMessage($"编码器 {SelectedEncoder} 没有对应的质量预设");
+                    _qualityPresetParams = string.Empty;
+                    return;
+                }
+
+                if (!encoderElement.TryGetProperty("presets", out var presetsElement))
+                {
+                    ShowErrorMessage($"编码器 {SelectedEncoder} 的预设配置不完整");
+                    _qualityPresetParams = string.Empty;
+                    return;
+                }
+
+                if (!presetsElement.TryGetProperty(SelectedQualityPreset, out var presetElement))
+                {
+                    ShowErrorMessage($"编码器 {SelectedEncoder} 没有 {SelectedQualityPreset} 质量预设");
+                    _qualityPresetParams = string.Empty;
+                    return;
+                }
+
+                _qualityPresetParams = presetElement.GetString() ?? string.Empty;
+                OnPropertyChanged(nameof(QualityPresetParams));
+            }
+            catch (Exception ex)
+            {
+                ShowErrorMessage($"读取质量预设时出错: {ex.Message}");
+                _qualityPresetParams = string.Empty;
+            }
+        }
+
+        private void ShowErrorMessage(string message)
+        {
+            var dialog = new ContentDialog
+            {
+                Title = "错误",
+                Content = message,
+                CloseButtonText = "确定",
+                XamlRoot = App.MainWindow.Content.XamlRoot
+            };
+            _ = dialog.ShowAsync();
         }
 
         private async Task BrowseFileAsync()
