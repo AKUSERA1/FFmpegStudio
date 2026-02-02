@@ -91,18 +91,26 @@
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="0.7*" />
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
                         <ComboBox Grid.Column="0" IsEditable="False" ItemsSource="{Binding Formats}" SelectedItem="{Binding SelectedFormat, Mode=TwoWay}" Header="容器" />
                         <ComboBox Grid.Column="1" IsEditable="True" ItemsSource="{Binding CodecCategories}" SelectedItem="{Binding SelectedCodecCategory, Mode=TwoWay}" Header="编码" />
                         <ComboBox Grid.Column="2" IsEditable="True" ItemsSource="{Binding Encoders}" SelectedItem="{Binding SelectedEncoder, Mode=TwoWay}" Header="编码器" />
-                        <ComboBox Grid.Column="3" IsEditable="True" ItemsSource="{Binding Resolutions}" SelectedItem="{Binding Resolution, Mode=TwoWay}" Header="分辨率" />
-                        <TextBox Grid.Column="4" PlaceholderText="kbps" Text="{Binding Bitrate, Mode=TwoWay}" Header="比特率" />
-                        <ComboBox Grid.Column="5" IsEditable="True" ItemsSource="{Binding FrameRates}" SelectedItem="{Binding FrameRate, Mode=TwoWay}" Header="帧率 (fps)" />
+                        <ComboBox Grid.Column="3" IsEditable="True" ItemsSource="{Binding Resolutions}" SelectedItem="{Binding Resolution, Mode=TwoWay}" Header="分辨率" Visibility="{Binding ShowAdvanced, Converter={StaticResource BoolToVisibilityConverter}}" />
+                        <TextBox Grid.Column="4" PlaceholderText="kbps" Text="{Binding Bitrate, Mode=TwoWay}" Header="比特率" Visibility="{Binding ShowAdvanced, Converter={StaticResource BoolToVisibilityConverter}}" />
+                        <ComboBox Grid.Column="5" IsEditable="True" ItemsSource="{Binding FrameRates}" SelectedItem="{Binding FrameRate, Mode=TwoWay}" Header="帧率 (fps)" Visibility="{Binding ShowAdvanced, Converter={StaticResource BoolToVisibilityConverter}}" />
                         <ComboBox Grid.Column="6" ItemsSource="{Binding ColorSpaces}" SelectedItem="{Binding ColorSpace, Mode=TwoWay}" Header="色彩空间" Visibility="{Binding ShowAdvanced, Converter={StaticResource BoolToVisibilityConverter}}" />
                     </Grid>
+                    
+                    <Grid Visibility="{Binding ShowAdvanced, Converter={StaticResource BoolToVisibilityConverter}}" Margin="0,10,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <TextBox Text="{Binding FFmpegCommand, Mode=TwoWay}" Header="FFmpeg 命令" TextWrapping="Wrap" AcceptsReturn="True" MinHeight="80" />
+                    </Grid>
+                    
                     <StackPanel Orientation="Horizontal" Spacing="10" Margin="0,10,0,0">
                         <Button Content="开始转换" Style="{ThemeResource AccentButtonStyle}" />
                         <Button Content="取消操作" />

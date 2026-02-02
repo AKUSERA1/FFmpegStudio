@@ -26,6 +26,7 @@ namespace FFmpegStudio.ViewModels
         private VideoInfo? _videoInfo;
         private bool _isLoadingVideoInfo;
         private bool _isLoadingEncoders;
+        private string _ffmpegCommand = string.Empty;
 
         public TranscodeViewModel()
         {
@@ -131,6 +132,12 @@ namespace FFmpegStudio.ViewModels
         {
             get => _colorSpace;
             set => SetProperty(ref _colorSpace, value);
+        }
+
+        public string FFmpegCommand
+        {
+            get => _ffmpegCommand;
+            set => SetProperty(ref _ffmpegCommand, value);
         }
 
         public ObservableCollection<string> Formats { get; } = new() { "MP4", "MKV", "AVI", "MOV", "FLV", "WebM" };
