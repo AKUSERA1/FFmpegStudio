@@ -35,13 +35,4 @@ namespace FFmpegStudio.Models
         public bool IsInstalled { get; set; }
     }
 
-    public class TranscodeTask
-    {
-        public string? Id { get; set; }
-        public string? SourceFile { get; set; }
-        public string? OutputFile { get; set; }
-        public string? Status { get; set; }
-        public int Progress { get; set; }
-        public DateTime CreateTime { get; set; }
-    }
 }
