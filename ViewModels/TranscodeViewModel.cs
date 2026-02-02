@@ -11,6 +11,8 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Windows.Storage;
 using Windows.Storage.Pickers;
+using System.Threading;
+using System.Text;
 
 namespace FFmpegStudio.ViewModels
 {
@@ -34,12 +36,17 @@ namespace FFmpegStudio.ViewModels
         private string _ffmpegCommand = string.Empty;
         private string _selectedQualityPreset = "medium";
         private string _qualityPresetParams = string.Empty;
+        private TranscodeTask? _currentTask;
+        private System.Diagnostics.Process? _ffmpegProcess;
+        private CancellationTokenSource? _ffmpegCts;
 
         public TranscodeViewModel()
         {
             _settingsService = Services.SettingsService.Instance;
             _ffmpegService = Services.FFmpegService.Instance;
             BrowseCommand = new RelayCommand(async _ => await BrowseFileAsync());
+            CancelCommand = new RelayCommand(_ => CancelTranscode());
+            StartTranscodeCommand = new RelayCommand(async _ => await StartTranscodeAsync());
             _ = LoadEncodersAsync();
         }
 
@@ -257,6 +264,8 @@ namespace FFmpegStudio.ViewModels
         public ObservableCollection<TranscodeTask> Tasks { get; } = new();
 
         public ICommand BrowseCommand { get; }
+        public ICommand CancelCommand { get; }
+        public ICommand StartTranscodeCommand { get; }
 
         private async Task LoadEncodersAsync()
         {
@@ -548,33 +557,364 @@ namespace FFmpegStudio.ViewModels
             }
         }
 
-        public TranscodeViewModel(Services.SettingsService settingsService) : this()
+        private void CancelTranscode()
         {
-            _settingsService = settingsService;
-            LoadMockTasks();
+            // 清空选中的源文件
+            SourceFilePath = string.Empty;
+
+            // 重置手动编辑标志和参数状态
+            _isCommandManuallyEdited = false;
+            _resolution = "原始";
+            _bitrate = "原始";
+            _frameRate = "原始";
+            _colorSpace = "BT.709";
+            
+            // 通知UI参数已更改
+            OnPropertyChanged(nameof(Resolution));
+            OnPropertyChanged(nameof(Bitrate));
+            OnPropertyChanged(nameof(FrameRate));
+            OnPropertyChanged(nameof(ColorSpace));
+
+            // 使用 CancellationTokenSource 请求取消执行中的转换
+            try
+            {
+                _ffmpegCts?.Cancel();
+            }
+            catch { }
+
+            // 线程安全地交换并处理正在运行的进程实例
+            var proc = System.Threading.Interlocked.Exchange(ref _ffmpegProcess, null);
+            if (proc != null)
+            {
+                try
+                {
+                    if (!proc.HasExited)
+                    {
+                        try
+                        {
+                            proc.Kill(entireProcessTree: true);
+                        }
+                        catch
+                        {
+                            // 某些平台不支持 entireProcessTree 参数，尝试非参数版本
+                            try { proc.Kill(); } catch { }
+                        }
+                        try { proc.WaitForExit(); } catch { }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    ShowErrorMessage($"停止转换时出错: {ex.Message}");
+                }
+                finally
+                {
+                    try { proc.Dispose(); } catch { }
+                }
+            }
+
+            // 更新当前任务状态
+            if (_currentTask != null)
+            {
+                _currentTask.Status = "已取消";
+                _currentTask.Progress = 0;
+                _currentTask.CompleteTime = DateTime.Now;
+                _currentTask = null;
+            }
+
+            // 释放并清理 CancellationTokenSource
+            var cts = Interlocked.Exchange(ref _ffmpegCts, null);
+            try { cts?.Dispose(); } catch { }
         }
 
-        private void LoadMockTasks()
+        private async Task StartTranscodeAsync()
         {
-            Tasks.Add(new TranscodeTask
+            if (string.IsNullOrEmpty(FFmpegCommand))
             {
-                Id = "1",
-                SourceFile = "video1.mp4",
-                OutputFile = "video1_transcoded.mkv",
-                Status = "完成",
-                Progress = 100,
-                CreateTime = DateTime.Now.AddHours(-2)
-            });
+                ShowErrorMessage("FFmpeg命令为空，无法开始转换");
+                return;
+            }
 
-            Tasks.Add(new TranscodeTask
+            string effectiveCommand = FFmpegCommand;
+
+            // 先尝试从命令文本中解析输出路径（回退到自动生成的输出路径）
+            string? outputPathFromCommand = ExtractOutputPathFromCommand(FFmpegCommand) ?? GetOutputFilePath();
+
+            try
             {
-                Id = "2",
-                SourceFile = "video2.avi",
-                OutputFile = "video2_transcoded.mp4",
-                Status = "转换中",
-                Progress = 45,
-                CreateTime = DateTime.Now.AddMinutes(-30)
-            });
+                if (!string.IsNullOrEmpty(outputPathFromCommand) && File.Exists(outputPathFromCommand))
+                {
+                    var dialog = new ContentDialog
+                    {
+                        Title = "输出文件已存在",
+                        Content = $"输出文件 \"{Path.GetFileName(outputPathFromCommand)}\" 已存在。是否覆盖？",
+                        PrimaryButtonText = "覆盖",
+                        CloseButtonText = "取消",
+                        XamlRoot = App.MainWindow.Content.XamlRoot
+                    };
+
+                    var result = await dialog.ShowAsync();
+                    if (result == ContentDialogResult.Primary)
+                    {
+                        // 插入 -y 参数用于覆盖输出
+                        effectiveCommand = InsertOverwriteFlag(FFmpegCommand);
+                    }
+                    else
+                    {
+                        // 用户选择不覆盖，停止执行
+                        return;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                ShowErrorMessage($"检查输出文件时出错: {ex.Message}");
+                return;
+            }
+
+            try
+            {
+                // 创建新任务记录
+                var task = new TranscodeTask
+                {
+                    SourceFile = Path.GetFileName(SourceFilePath),
+                    OutputFile = Path.GetFileName(GetOutputFilePath()),
+                    Status = "转换中",
+                    Progress = 0,
+                    CreateTime = DateTime.Now,
+                    FFmpegCommand = FFmpegCommand
+                };
+
+                Tasks.Insert(0, task);
+                _currentTask = task;
+
+                // 执行FFmpeg命令，可能使用已注入 -y 的 effectiveCommand
+                await ExecuteFFmpegCommandAsync(task, effectiveCommand);
+            }
+            catch (Exception ex)
+            {
+                ShowErrorMessage($"开始转换时出错: {ex.Message}");
+                if (_currentTask != null)
+                {
+                    _currentTask.Status = "失败";
+                    _currentTask.Progress = 0;
+                    _currentTask.CompleteTime = DateTime.Now;
+                }
+            }
+        }
+
+        // 将 -y 插入到命令的输出参数之前，保持原始引号和顺序
+        private static string InsertOverwriteFlag(string command)
+        {
+            if (string.IsNullOrWhiteSpace(command))
+                return command;
+
+            // 如果已经包含 -y，则直接返回
+            if (command.Contains(" -y") || command.Contains("-y ") || command.Trim().EndsWith("-y"))
+                return command;
+
+            var tokens = TokenizeCommand(command);
+            if (tokens.Count == 0)
+                return command;
+
+            // 在最后一个参数（通常为输出文件）之前插入 -y
+            int insertIndex = Math.Max(1, tokens.Count - 1);
+            tokens.Insert(insertIndex, "-y");
+
+            return string.Join(' ', tokens);
+        }
+
+        // 简单的命令行分词，保留引号内容
+        private static List<string> TokenizeCommand(string command)
+        {
+            var tokens = new List<string>();
+            if (string.IsNullOrEmpty(command))
+                return tokens;
+
+            var sb = new StringBuilder();
+            bool inQuotes = false;
+            for (int i = 0; i < command.Length; i++)
+            {
+                char c = command[i];
+                if (c == '"')
+                {
+                    inQuotes = !inQuotes;
+                    sb.Append(c);
+                }
+                else if (char.IsWhiteSpace(c) && !inQuotes)
+                {
+                    if (sb.Length > 0)
+                    {
+                        tokens.Add(sb.ToString());
+                        sb.Clear();
+                    }
+                }
+                else
+                {
+                    sb.Append(c);
+                }
+            }
+
+            if (sb.Length > 0)
+                tokens.Add(sb.ToString());
+
+            return tokens;
+        }
+
+        // 从 FFmpeg 命令中解析最后一个参数作为输出文件路径（去除引号）
+        private static string? ExtractOutputPathFromCommand(string command)
+        {
+            var tokens = TokenizeCommand(command);
+            if (tokens.Count == 0)
+                return null;
+
+            var last = tokens.Last().Trim();
+            if (last.StartsWith("\"") && last.EndsWith("\""))
+            {
+                last = last.Substring(1, last.Length - 2);
+            }
+            return last;
+        }
+
+        private async Task ExecuteFFmpegCommandAsync(TranscodeTask task, string? overrideCommand = null)
+        {
+            var commandToUse = overrideCommand ?? FFmpegCommand;
+
+            var startInfo = new System.Diagnostics.ProcessStartInfo
+            {
+                FileName = "ffmpeg",
+                Arguments = commandToUse.Replace("ffmpeg ", "").Trim(),
+                UseShellExecute = false,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                CreateNoWindow = true
+            };
+
+            // 使用局部变量引用 Process，避免并发造成字段为 null 的竞态
+            var process = new System.Diagnostics.Process { StartInfo = startInfo };
+
+            // 将共享字段设置为当前实例，CancelTranscode 会交换为 null
+            _ffmpegProcess = process;
+
+            // 创建 CancellationTokenSource，用于取消 WaitForExitAsync
+            var cts = new CancellationTokenSource();
+            _ffmpegCts = cts;
+
+            // 收集错误信息
+            var errorMessages = new StringBuilder();
+
+            // 处理输出和错误
+            process.OutputDataReceived += (sender, e) =>
+            {
+                if (!string.IsNullOrEmpty(e.Data))
+                {
+                    UpdateProgressFromOutput(e.Data, task);
+                }
+            };
+
+            process.ErrorDataReceived += (sender, e) =>
+            {
+                if (!string.IsNullOrEmpty(e.Data))
+                {
+                    UpdateProgressFromOutput(e.Data, task);
+                    
+                    // 收集错误信息
+                    if (e.Data.Contains("Error") || e.Data.Contains("error") || e.Data.Contains("failed") || e.Data.Contains("Invalid"))
+                    {
+                        errorMessages.AppendLine(e.Data);
+                    }
+                }
+            };
+
+            try
+            {
+                process.Start();
+                process.BeginOutputReadLine();
+                process.BeginErrorReadLine();
+
+                // 等待进程退出（可被 CancellationToken 取消）
+                try
+                {
+                    await process.WaitForExitAsync(cts.Token);
+                }
+                catch (OperationCanceledException)
+                {
+                    // 取消时将任务标记为已取消
+                    task.Status = "已取消";
+                    task.Progress = 0;
+                    task.CompleteTime = DateTime.Now;
+                    return;
+                }
+
+                // 进程正常结束，检查退出码（使用本地变量避免竞态）
+                if (process.ExitCode == 0)
+                {
+                    task.Status = "完成";
+                    task.Progress = 100;
+                }
+                else
+                {
+                    task.Status = "失败";
+                    task.Progress = 0;
+                    
+                    // 显示FFmpeg错误信息
+                    var errorMessage = errorMessages.ToString();
+                    if (!string.IsNullOrEmpty(errorMessage))
+                    {
+                        ShowErrorMessage($"FFmpeg转换失败 (退出码: {process.ExitCode}):\n\n{errorMessage}");
+                    }
+                    else
+                    {
+                        ShowErrorMessage($"FFmpeg转换失败 (退出码: {process.ExitCode})");
+                    }
+                }
+
+                task.CompleteTime = DateTime.Now;
+            }
+            catch (Exception ex)
+            {
+                task.Status = "失败";
+                task.Progress = 0;
+                task.CompleteTime = DateTime.Now;
+                ShowErrorMessage($"执行FFmpeg命令时出错: {ex.Message}");
+            }
+            finally
+            {
+                // 清理并释放资源，确保线程安全地清空共享字段
+                var proc = System.Threading.Interlocked.Exchange(ref _ffmpegProcess, null);
+                try { if (proc != null) proc.Dispose(); } catch { }
+
+                var tokenSource = Interlocked.Exchange(ref _ffmpegCts, null);
+                try { tokenSource?.Dispose(); } catch { }
+
+                _currentTask = null;
+            }
+        }
+
+        private void UpdateProgressFromOutput(string output, TranscodeTask task)
+        {
+            // 简单的进度解析逻辑，可以根据实际FFmpeg输出调整
+            if (output.Contains("time="))
+            {
+                // 尝试解析时间进度
+                var timeMatch = System.Text.RegularExpressions.Regex.Match(output, @"time=([0-9:.]+)");
+                if (timeMatch.Success && VideoInfo != null && VideoInfo.Duration.TotalSeconds > 0)
+                {
+                    var currentTime = TimeSpan.Parse(timeMatch.Groups[1].Value);
+                    var progress = (int)((currentTime.TotalSeconds / VideoInfo.Duration.TotalSeconds) * 100);
+                    progress = Math.Min(100, Math.Max(0, progress));
+
+                    // 在UI线程上更新进度
+                    var uiDispatcher = FFmpegStudio.App.MainWindow?.DispatcherQueue;
+                    if (uiDispatcher != null)
+                    {
+                        uiDispatcher.TryEnqueue(() => task.Progress = progress);
+                    }
+                    else
+                    {
+                        task.Progress = progress;
+                    }
+                }
+            }
         }
     }
 }
