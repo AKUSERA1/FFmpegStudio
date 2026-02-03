@@ -46,6 +46,8 @@ namespace FFmpegStudio.ViewModels
 
             BrowseFrameSequenceCommand = new RelayCommand(async _ => await BrowseFrameSequenceAsync());
             BrowseAudioCommand = new RelayCommand(async _ => await BrowseAudioAsync());
+            StartSynthesisCommand = new RelayCommand(async _ => await StartSynthesisAsync());
+            CancelSynthesisCommand = new RelayCommand(_ => CancelSynthesis());
 
             _ = LoadEncodersAsync();
         }
@@ -226,21 +228,9 @@ namespace FFmpegStudio.ViewModels
 
         public ObservableCollection<TranscodeTask> Tasks { get; } = new();
 
-        public ICommand StartSynthesisCommand { get; } = new RelayCommand(async vm =>
-        {
-            if (vm is FrameSequenceSynthViewModel self)
-            {
-                await self.StartSynthesisAsync();
-            }
-        });
+        public ICommand StartSynthesisCommand { get; }
 
-        public ICommand CancelSynthesisCommand { get; } = new RelayCommand(vm =>
-        {
-            if (vm is FrameSequenceSynthViewModel self)
-            {
-                self.CancelSynthesis();
-            }
-        });
+        public ICommand CancelSynthesisCommand { get; }
 
         #endregion
 
@@ -446,7 +436,7 @@ namespace FFmpegStudio.ViewModels
                     var encoder = GetAudioEncoderName();
                     if (!string.IsNullOrEmpty(encoder))
                     {
-                        commandParts.AddRange(new[] { "-c:a", encoder });
+                        commandParts.AddRange(new[] { "-c:a ",$"{encoder} -shortest" });
                     }
                 }
 
@@ -857,7 +847,17 @@ namespace FFmpegStudio.ViewModels
                     // 检查退出码，如果为 100 表示成功
                     var current = task.Progress;
                     var next = Math.Min(95, current + 1);
-                    task.Progress = next;
+                    
+                    // 在UI线程上更新进度
+                    var uiDispatcher = App.MainWindow?.DispatcherQueue;
+                    if (uiDispatcher != null)
+                    {
+                        uiDispatcher.TryEnqueue(() => task.Progress = next);
+                    }
+                    else
+                    {
+                        task.Progress = next;
+                    }
                 }
             }
         }
