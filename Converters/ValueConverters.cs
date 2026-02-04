@@ -83,4 +83,19 @@ namespace FFmpegStudio.Converters
             throw new NotImplementedException();
         }
     }
+
+    public class DoubleToStringConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, string language)
+        {
+            return value is double d ? d.ToString("F0") : "0";
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, string language)
+        {
+            if (value is string s && double.TryParse(s, out var result))
+                return Math.Clamp(result, 0, 100);
+            return 0.0;
+        }
+    }
 }

@@ -6,70 +6,124 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
+    MinWidth="800"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
     <ScrollViewer>
-        <StackPanel Padding="20" Spacing="20">
+        <StackPanel Padding="20" Spacing="20" >
             <TextBlock Text="视频提取为帧序列" FontSize="32" FontWeight="Bold" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
 
             <Border BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Padding="20" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
                 <StackPanel Spacing="12">
-                    <TextBlock Text="视频文件" FontSize="18" FontWeight="SemiBold" />
+                    <TextBlock Text="选择视频" FontSize="18" FontWeight="SemiBold" />
                     <Grid ColumnSpacing="12">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="Auto" />
-                            <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
                         <TextBox PlaceholderText="选择要提取的视频文件..." Text="{Binding VideoFilePath, Mode=TwoWay}" IsReadOnly="True" />
-                        <Button Grid.Column="1" Content="浏览" CornerRadius="4" />
-                        <Button Grid.Column="2" Content="预览" CornerRadius="4" />
+                        <Button Grid.Column="1" Content="浏览" CornerRadius="4" Command="{Binding BrowseCommand}" />
                     </Grid>
-                    <TextBlock Text="预览" FontWeight="SemiBold" Margin="0,10,0,0" />
-                    <Border Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}" Height="200" CornerRadius="4">
-                        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="10">
-                            <SymbolIcon Symbol="Play" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                            <TextBlock Text="视频预览区域" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextAlignment="Center" />
+
+                    <Grid Visibility="{Binding HasVideoInfo, Converter={StaticResource BoolToVisibilityConverter}}" Margin="0,8,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+
+                        <StackPanel Grid.Column="0" Grid.Row="0" Spacing="4" Margin="0,0,12,12">
+                            <TextBlock Text="文件大小" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                            <TextBlock Text="{Binding VideoInfo.FileSizeFormatted}" FontSize="14" FontWeight="SemiBold" />
                         </StackPanel>
-                    </Border>
+
+                        <StackPanel Grid.Column="1" Grid.Row="0" Spacing="4" Margin="0,0,12,12">
+                            <TextBlock Text="视频编码" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                            <TextBlock Text="{Binding VideoInfo.VideoCodec}" FontSize="14" FontWeight="SemiBold" />
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="2" Grid.Row="0" Spacing="4" Margin="0,0,12,12">
+                            <TextBlock Text="音频编码" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                            <TextBlock Text="{Binding VideoInfo.AudioCodec}" FontSize="14" FontWeight="SemiBold" />
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="3" Grid.Row="0" Spacing="4" Margin="0,0,0,12">
+                            <TextBlock Text="分辨率" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                            <TextBlock Text="{Binding VideoInfo.Resolution}" FontSize="14" FontWeight="SemiBold" />
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="0" Grid.Row="1" Spacing="4" Margin="0,0,12,0">
+                            <TextBlock Text="码率" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                            <TextBlock Text="{Binding VideoInfo.Bitrate}" FontSize="14" FontWeight="SemiBold" />
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="1" Grid.Row="1" Spacing="4" Margin="0,0,12,0">
+                            <TextBlock Text="帧率" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                            <TextBlock Text="{Binding VideoInfo.FrameRate}" FontSize="14" FontWeight="SemiBold" />
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="2" Grid.Row="1" Spacing="4" Margin="0,0,12,0">
+                            <TextBlock Text="色深" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                            <TextBlock Text="{Binding VideoInfo.BitDepth}" FontSize="14" FontWeight="SemiBold" />
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="3" Grid.Row="1" Spacing="4" Margin="0,0,0,0">
+                            <TextBlock Text="色彩空间" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                            <TextBlock Text="{Binding VideoInfo.ColorSpace}" FontSize="14" FontWeight="SemiBold" />
+                        </StackPanel>
+                    </Grid>
+
+                    <ProgressRing IsActive="{Binding IsLoadingVideoInfo}" Visibility="{Binding IsLoadingVideoInfo, Converter={StaticResource BoolToVisibilityConverter}}" HorizontalAlignment="Left" />
+
                 </StackPanel>
             </Border>
 
             <Border BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Padding="20" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
                 <StackPanel Spacing="16">
                     <TextBlock Text="提取设置" FontSize="18" FontWeight="SemiBold" />
-                    <Grid ColumnSpacing="20" RowSpacing="15">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="*" />
-                        </Grid.ColumnDefinitions>
-                        <ComboBox ItemsSource="{Binding Formats}" SelectedItem="{Binding SelectedFormat, Mode=TwoWay}" Header="输出格式" />
-                        <TextBox Grid.Column="1" PlaceholderText="1=每帧提取, 2=每2帧提取" Text="{Binding FrameInterval, Mode=TwoWay}" Header="帧提取间隔" Visibility="{Binding ShowAdvanced, Converter={StaticResource BoolToVisibilityConverter}}" />
-                    </Grid>
-                </StackPanel>
-            </Border>
-
-            <Border BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Padding="20" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
-                <StackPanel Spacing="12">
-                    <TextBlock Text="输出设置" FontSize="18" FontWeight="SemiBold" />
                     <Grid ColumnSpacing="12">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
-                        <TextBox PlaceholderText="选择输出目录..." Text="{Binding OutputPath, Mode=TwoWay}" IsReadOnly="True" Header="输出文件夹" />
-                        <Button Grid.Column="1" Content="浏览" CornerRadius="4" VerticalAlignment="Bottom" Margin="0,0,0,0" />
+                        <TextBox PlaceholderText="选择输出目录..." Text="{Binding OutputPath, Mode=TwoWay}" IsReadOnly="True" />
+                        <ComboBox Grid.Column="1" IsEditable="True" ItemsSource="{Binding FileNameTemplates}" SelectedItem="{Binding FileNameTemplate, Mode=TwoWay}" />
+                        <Button Grid.Column="2" Content="浏览" CornerRadius="4" VerticalAlignment="Bottom" />
                     </Grid>
-                    <TextBlock Text="文件名模板" FontWeight="SemiBold" Margin="0,10,0,0" />
-                    <ComboBox IsEditable="True" ItemsSource="{Binding FileNameTemplates}" SelectedItem="{Binding FileNameTemplate, Mode=TwoWay}" />
-                    <TextBlock FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}">模板说明: %06d = 六位数顺序编号, %05d = 五位数, 等</TextBlock>
+                    <Grid ColumnSpacing="12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <ComboBox Grid.Column="0" ItemsSource="{Binding Formats}" SelectedItem="{Binding SelectedFormat, Mode=TwoWay}" Header="输出格式" MinWidth="80" />
+                        <ComboBox Grid.Column="1" Header="保留Alpha通道" HorizontalAlignment="Left" MinWidth="100" Margin="10,0,0,0" />
+                        <Slider Grid.Column="2" Minimum="0" Maximum="100" Value="{Binding Quality, Mode=TwoWay}" HorizontalAlignment="Stretch" MinWidth="110" MaxWidth="350" Margin="10,0,20,0">
+                            <Slider.Header>
+                                <TextBlock>
+                                        <Run Text="质量(" />
+                                        <Run Text="{Binding Quality, Mode=OneWay}" />
+                                        <Run Text=")" />
+                                </TextBlock>
+                            </Slider.Header>
+                        </Slider>
+                        <ComboBox Grid.Column="3" Header="EXR精度" MinWidth="60" Margin="10,0,0,0" />
+                        <ComboBox Grid.Column="4" Header="EXR编码器" MinWidth="80" />
+                    </Grid>
+                    <StackPanel Orientation="Horizontal" Spacing="10">
+                        <Button Content="开始提取" Style="{ThemeResource AccentButtonStyle}" CornerRadius="4" />
+                        <Button Content="取消操作" CornerRadius="4" />
+                    </StackPanel>
                 </StackPanel>
             </Border>
-
-            <StackPanel Orientation="Horizontal" Spacing="10">
-                <Button Content="开始提取" Style="{ThemeResource AccentButtonStyle}" Padding="20,10" />
-                <Button Content="取消操作" Padding="20,10" />
-            </StackPanel>
         </StackPanel>
     </ScrollViewer>
 </Page>
