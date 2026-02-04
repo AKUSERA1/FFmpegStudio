@@ -509,9 +509,13 @@ namespace FFmpegStudio.ViewModels
 
         private async Task ExecuteFFmpegCommandAsync(TranscodeTask task)
         {
+            // 获取用户指定的 FFmpeg 路径
+            var ffmpegPath = _settingsService.FFmpegPath;
+            var executablePath = string.IsNullOrEmpty(ffmpegPath) ? "ffmpeg" : ffmpegPath;
+
             var startInfo = new System.Diagnostics.ProcessStartInfo
             {
-                FileName = "ffmpeg",
+                FileName = executablePath,
                 Arguments = FFmpegCommand.Replace("ffmpeg ", "").Trim(),
                 UseShellExecute = false,
                 RedirectStandardOutput = true,

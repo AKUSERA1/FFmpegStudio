@@ -131,7 +131,9 @@ namespace FFmpegStudio.Services
             try
             {
                 var output = await ExecuteFFmpegAsync(executablePath, "-version");
-                return ParseFFmpegVersion(output);
+                var versionInfo = ParseFFmpegVersion(output);
+                versionInfo.IsManualPath = !string.IsNullOrEmpty(ffmpegPath);
+                return versionInfo;
             }
             catch (Exception ex)
             {
@@ -140,7 +142,8 @@ namespace FFmpegStudio.Services
                 {
                     Version = "未知",
                     BuildDate = "-",
-                    IsInstalled = false
+                    IsInstalled = false,
+                    IsManualPath = !string.IsNullOrEmpty(ffmpegPath)
                 };
             }
         }
@@ -202,33 +205,35 @@ namespace FFmpegStudio.Services
                 {
                     Version = "未检测",
                     BuildDate = "-",
-                    IsInstalled = false
+                    IsInstalled = false,
+                    IsManualPath = !string.IsNullOrEmpty(_settingsService.FFmpegPath)
                 };
             }
 
             var versionInfo = new FFmpegVersionInfo { IsInstalled = true };
 
-            // Extract version number (e.g., "ffmpeg version 5.1.2 Copyright")
-            var versionMatch = Regex.Match(output, @"ffmpeg version ([\d.]+)");
+            // Extract version part between "version" and "Copyright"
+            var versionMatch = Regex.Match(output, @"ffmpeg version (.*?) Copyright", RegexOptions.Singleline);
             if (versionMatch.Success)
             {
-                versionInfo.Version = versionMatch.Groups[1].Value;
+                versionInfo.Version = versionMatch.Groups[1].Value.Trim();
             }
             else
             {
-                versionInfo.Version = "已安装";
+                // Fallback: try to get just the version number
+                var simpleVersionMatch = Regex.Match(output, @"ffmpeg version ([\d.]+)");
+                if (simpleVersionMatch.Success)
+                {
+                    versionInfo.Version = simpleVersionMatch.Groups[1].Value;
+                }
+                else
+                {
+                    versionInfo.Version = "已安装";
+                }
             }
 
-            // Extract build date (e.g., "built with gcc 10.2.0 (RevisionVersion 10.2.0-1)")
-            var dateMatch = Regex.Match(output, @"built on (\d{4}-\d{2}-\d{2})");
-            if (dateMatch.Success)
-            {
-                versionInfo.BuildDate = dateMatch.Groups[1].Value;
-            }
-            else
-            {
-                versionInfo.BuildDate = "-";
-            }
+            // Build date is no longer needed
+            versionInfo.BuildDate = "-";
 
             return versionInfo;
         }

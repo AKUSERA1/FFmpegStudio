@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using FFmpegStudio.Services;
 using Windows.Storage.Pickers;
 using Microsoft.UI.Xaml.Controls;
+using System.Text.Json;
 
 namespace FFmpegStudio.ViewModels
 {
@@ -19,14 +20,23 @@ namespace FFmpegStudio.ViewModels
         private bool _isInstallingFFmpeg;
         private string _installationStatus = string.Empty;
         private bool _showInstallationStatus;
+        private AboutInfo _aboutInfo = new AboutInfo();
+
+        public AboutInfo AboutInfo
+        {
+            get => _aboutInfo;
+            set => SetProperty(ref _aboutInfo, value);
+        }
 
         public SettingsViewModel()
         {
             _settingsService = SettingsService.Instance;
             _ffmpegService = FFmpegService.Instance;
             BrowseFFmpegCommand = new RelayCommand(_ => BrowseFFmpegAsync());
+            ResetFFmpegPathCommand = new RelayCommand(_ => ResetFFmpegPath());
             InstallFFmpegWithWinGetCommand = new RelayCommand(_ => InstallFFmpegAsync());
             LoadSettings();
+            LoadAboutInfo();
         }
 
         private void LoadSettings()
@@ -91,6 +101,11 @@ namespace FFmpegStudio.ViewModels
             set => SetProperty(ref _isInstallingFFmpeg, value);
         }
 
+        public bool CanInstallFFmpeg
+        {
+            get => !IsInstallingFFmpeg && !IsFFmpegInstalled;
+        }
+
         public string InstallationStatus
         {
             get => _installationStatus;
@@ -104,6 +119,7 @@ namespace FFmpegStudio.ViewModels
         }
 
         public RelayCommand BrowseFFmpegCommand { get; }
+        public RelayCommand ResetFFmpegPathCommand { get; }
         public RelayCommand InstallFFmpegWithWinGetCommand { get; }
         public RelayCommand SaveSettingsCommand { get; }
 
@@ -147,13 +163,28 @@ namespace FFmpegStudio.ViewModels
             {
                 var versionInfo = await _ffmpegService.GetFFmpegVersionAsync();
                 IsFFmpegInstalled = versionInfo.IsInstalled;
-                FFmpegStatus = versionInfo.IsInstalled ? $"已安装 - 版本 {versionInfo.Version}" : "未检测";
+                if (versionInfo.IsInstalled)
+                {
+                    var source = versionInfo.IsManualPath ? "手动指定" : "系统PATH";
+                    FFmpegStatus = $"已安装 - 版本 {versionInfo.Version} ({source})";
+                }
+                else
+                {
+                    FFmpegStatus = "未检测";
+                }
+                OnPropertyChanged(nameof(CanInstallFFmpeg));
             }
             catch
             {
                 IsFFmpegInstalled = false;
                 FFmpegStatus = "未检测";
+                OnPropertyChanged(nameof(CanInstallFFmpeg));
             }
+        }
+
+        private void ResetFFmpegPath()
+        {
+            FFmpegPath = string.Empty;
         }
 
         private async void InstallFFmpegAsync()
@@ -200,8 +231,41 @@ namespace FFmpegStudio.ViewModels
             finally
             {
                 IsInstallingFFmpeg = false;
+                OnPropertyChanged(nameof(CanInstallFFmpeg));
             }
         }
+
+        private void LoadAboutInfo()
+        {
+            try
+            {
+                var aboutFilePath = Path.Combine(AppContext.BaseDirectory, "Assets", "About.json");
+                if (File.Exists(aboutFilePath))
+                {
+                    var jsonContent = File.ReadAllText(aboutFilePath);
+                    AboutInfo = JsonSerializer.Deserialize<AboutInfo>(jsonContent) ?? new AboutInfo();
+                }
+            }
+            catch (Exception ex)
+            {
+                // Handle error loading about info
+                AboutInfo = new AboutInfo
+                {
+                    Version = "1.0.0",
+                    Description = "一个基于 FFmpeg 的多媒体处理工具",
+                    Changelog = new[] { "初始版本发布" },
+                    ProjectUrl = "https://github.com/your-username/FFmpegStudio"
+                };
+            }
+        }
+    }
+
+    public class AboutInfo
+    {
+        public string Version { get; set; } = string.Empty;
+        public string Description { get; set; } = string.Empty;
+        public string[] Changelog { get; set; } = Array.Empty<string>();
+        public string ProjectUrl { get; set; } = string.Empty;
     }
 
     public class RelayCommand : System.Windows.Input.ICommand
