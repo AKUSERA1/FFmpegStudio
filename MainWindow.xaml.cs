@@ -29,13 +29,29 @@ namespace FFmpegStudio
             NavView.SelectedItem = NavView.MenuItems[0];
             ContentFrame.Navigate(typeof(HomePage));
 
-            // ÉèÖÃ´°¿Ú×îĞ¡³ß´ç£¬·ÀÖ¹ÓÃ»§½«´°¿ÚËõµÃ±È Page.MinWidth ¸üÕ­
+            // è®¾ç½®çª—å£æœ€å°å°ºå¯¸ï¼Œé˜²æ­¢ç”¨æˆ·è°ƒæ•´çª—å£æ¯” Page.MinWidth æ›´çª„
             var hwnd = WindowNative.GetWindowHandle(this);
-            var windowId = Microsoft.UI.Win32Interop.GetWindowIdFromWindow(hwnd); // ĞŞÕı´ËĞĞ
+            var windowId = Microsoft.UI.Win32Interop.GetWindowIdFromWindow(hwnd); // è·å–çª—å£ID
             _appWindow = AppWindow.GetFromWindowId(windowId);
+            
+            // è®¾ç½®çª—å£å›¾æ ‡
+            try
+            {
+                var iconPath = Path.Combine(AppContext.BaseDirectory, "Assets", "icon.ico");
+                if (File.Exists(iconPath))
+                {
+                    _appWindow.SetIcon(iconPath);
+                }
+            }
+            catch (Exception ex)
+            {
+                // å›¾æ ‡è®¾ç½®å¤±è´¥ä¸å½±å“ç¨‹åºè¿è¡Œ
+                System.Diagnostics.Debug.WriteLine($"è®¾ç½®çª—å£å›¾æ ‡å¤±è´¥: {ex.Message}");
+            }
+            
             if (_appWindow?.Presenter is OverlappedPresenter presenter)
             {
-                // ½«¿í¶ÈÉèÎª 800£¨ÓëÄãÔÚ Page ÉÏÊ¹ÓÃµÄ MinWidth ±£³ÖÒ»ÖÂ£©£¬¸ß¶È¿É°´ĞèÉèÖÃ
+                // è®¾ç½®æœ€å°å®½åº¦ä¸º 800 ä¸ Page ä½¿ç”¨çš„ MinWidth ä¿æŒä¸€è‡´ï¼Œé«˜åº¦å¯è‡ªé€‚åº”
                 presenter.PreferredMinimumWidth = 1800;
                 presenter.PreferredMinimumHeight = 600;
             }
