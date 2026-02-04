@@ -15,6 +15,7 @@
             <converters:NegativeBoolConverter x:Key="NegativeBoolConverter" />
             <converters:NegativeBoolToVisibilityConverter x:Key="NegativeBoolToVisibilityConverter" />
             <converters:StringNotEmptyToBoolConverter x:Key="StringNotEmptyToBoolConverter" />
+            <converters:DoubleToStringConverter x:Key="DoubleToStringConverter" />
         </ResourceDictionary>
     </Application.Resources>
 </Application>

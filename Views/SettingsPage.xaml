@@ -30,8 +30,8 @@
 
             <Border BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Padding="20" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
                 <StackPanel Spacing="12">
-                    <TextBlock Text="WinGet 安装 FFmpeg" FontSize="18" FontWeight="SemiBold" />
-                    <TextBlock Text="使用 WinGet 包管理器自动安装 FFmpeg" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                    <TextBlock Text="安装 FFmpeg" FontSize="18" FontWeight="SemiBold" />
+                    <TextBlock Text="推荐使用 WinGet 包管理器自动安装 FFmpeg" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                     <Button Content="通过 WinGet 安装 FFmpeg" Style="{ThemeResource AccentButtonStyle}" Command="{Binding InstallFFmpegWithWinGetCommand}" IsEnabled="{Binding IsInstallingFFmpeg, Converter={StaticResource NegativeBoolConverter}}" />
                     <ProgressBar IsIndeterminate="{Binding IsInstallingFFmpeg}" Visibility="{Binding IsInstallingFFmpeg, Converter={StaticResource BoolToVisibilityConverter}}" Margin="0,8,0,0" />
                     <TextBlock Text="{Binding InstallationStatus}" Visibility="{Binding ShowInstallationStatus, Converter={StaticResource BoolToVisibilityConverter}}" Margin="0,8,0,0" />

@@ -13,16 +13,48 @@ using Microsoft.UI.Xaml.Navigation;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
 using FFmpegStudio.Views;
+using Microsoft.UI.Windowing;
+using WinRT.Interop;
+using Windows.Graphics;
 
 namespace FFmpegStudio
 {
     public sealed partial class MainWindow : Window
     {
+        private AppWindow? _appWindow;
+
         public MainWindow()
         {
             InitializeComponent();
             NavView.SelectedItem = NavView.MenuItems[0];
             ContentFrame.Navigate(typeof(HomePage));
+
+            // 设置窗口最小尺寸，防止用户调整窗口比 Page.MinWidth 更窄
+            var hwnd = WindowNative.GetWindowHandle(this);
+            var windowId = Microsoft.UI.Win32Interop.GetWindowIdFromWindow(hwnd); // 获取窗口ID
+            _appWindow = AppWindow.GetFromWindowId(windowId);
+            
+            // 设置窗口图标
+            try
+            {
+                var iconPath = Path.Combine(AppContext.BaseDirectory, "Assets", "icon.ico");
+                if (File.Exists(iconPath))
+                {
+                    _appWindow.SetIcon(iconPath);
+                }
+            }
+            catch (Exception ex)
+            {
+                // 图标设置失败不影响程序运行
+                System.Diagnostics.Debug.WriteLine($"设置窗口图标失败: {ex.Message}");
+            }
+            
+            if (_appWindow?.Presenter is OverlappedPresenter presenter)
+            {
+                // 设置最小宽度为 800 与 Page 使用的 MinWidth 保持一致，高度可自适应
+                presenter.PreferredMinimumWidth = 1800;
+                presenter.PreferredMinimumHeight = 600;
+            }
         }
 
         private void NavView_ItemInvoked(NavigationView sender, NavigationViewItemInvokedEventArgs args)
