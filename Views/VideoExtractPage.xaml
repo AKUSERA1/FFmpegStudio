@@ -105,18 +105,25 @@
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
                         <ComboBox Grid.Column="0" ItemsSource="{Binding Formats}" SelectedItem="{Binding SelectedFormat, Mode=TwoWay}" Header="输出格式" MinWidth="80" />
-                        <ComboBox Grid.Column="1" Header="保留Alpha通道" HorizontalAlignment="Left" MinWidth="100" Margin="10,0,0,0" />
-                        <Slider Grid.Column="2" Minimum="0" Maximum="100" Value="{Binding Quality, Mode=TwoWay}" HorizontalAlignment="Stretch" MinWidth="110" MaxWidth="350" Margin="10,0,20,0">
+                        <ComboBox Grid.Column="1" Header="Alpha(视频有才生效)" HorizontalAlignment="Left" MinWidth="100" Margin="10,0,0,0" 
+                                  ItemsSource="{Binding AlphaChannelOptions}" SelectedItem="{Binding AlphaChannel, Mode=TwoWay}"
+                                  IsEnabled="{Binding IsAlphaChannelEnabled}" />
+                        <Slider Grid.Column="2" Minimum="0" Maximum="100" Value="{Binding Quality, Mode=TwoWay}" HorizontalAlignment="Stretch" MinWidth="110" MaxWidth="350" Margin="10,0,20,0"
+                                IsEnabled="{Binding IsQualityEnabled}">
                             <Slider.Header>
-                                <TextBlock>
-                                        <Run Text="质量(" />
-                                        <Run Text="{Binding Quality, Mode=OneWay}" />
-                                        <Run Text=")" />
-                                </TextBlock>
+                                    <TextBlock>
+                                            <Run Text="JPG质量(" />
+                                            <Run Text="{Binding Quality, Mode=OneWay}" />
+                                            <Run Text=")" />
+                                    </TextBlock>
                             </Slider.Header>
                         </Slider>
-                        <ComboBox Grid.Column="3" Header="EXR精度" MinWidth="60" Margin="10,0,0,0" />
-                        <ComboBox Grid.Column="4" Header="EXR编码器" MinWidth="80" />
+                        <ComboBox Grid.Column="3" Header="EXR精度" Width="160" Margin="10,0,0,0" 
+                                  ItemsSource="{Binding ExrPrecisionOptions}" SelectedItem="{Binding ExrPrecision, Mode=TwoWay}"
+                                  IsEnabled="{Binding IsExrPrecisionEnabled}" />
+                        <ComboBox Grid.Column="4" Header="EXR编码器" Width="130" Margin="10,0,0,0"
+                                  ItemsSource="{Binding ExrEncodingOptions}" SelectedItem="{Binding ExrEncoding, Mode=TwoWay}"
+                                  IsEnabled="{Binding IsExrEncodingEnabled}" />
                     </Grid>
                     <StackPanel Orientation="Horizontal" Spacing="10">
                         <Button Content="开始提取" Style="{ThemeResource AccentButtonStyle}" CornerRadius="4" />
