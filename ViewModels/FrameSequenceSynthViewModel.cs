@@ -668,9 +668,13 @@ namespace FFmpegStudio.ViewModels
         {
             var commandToUse = overrideCommand ?? FFmpegCommand;
 
+            // 获取用户指定的 FFmpeg 路径
+            var ffmpegPath = _settingsService.FFmpegPath;
+            var executablePath = string.IsNullOrEmpty(ffmpegPath) ? "ffmpeg" : ffmpegPath;
+
             var startInfo = new System.Diagnostics.ProcessStartInfo
             {
-                FileName = "ffmpeg",
+                FileName = executablePath,
                 Arguments = commandToUse.Replace("ffmpeg ", "").Trim(),
                 UseShellExecute = false,
                 RedirectStandardOutput = true,

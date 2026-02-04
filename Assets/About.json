@@ -1,0 +1,9 @@
+{
+  "Version": "Alpha 1.0",
+  "Description": "一个基于 FFmpeg 的GUI多媒体处理工具，提供直观的图形化操作。更多功能开发中",
+  "Changelog": [
+    "初始版本发布",
+    "支持视频转换、裁剪、合并等功能"
+  ],
+  "ProjectUrl": "https://github.com/AKUSERA1/FFmpegStudio"
+}

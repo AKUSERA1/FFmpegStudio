@@ -14,18 +14,14 @@
 
             <Border BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Padding="20" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
                 <StackPanel Spacing="12">
-                    <TextBlock Text="FFmpeg 版本信息" FontSize="18" FontWeight="SemiBold" />
+                    <TextBlock Text="FFmpeg 信息" FontSize="18" FontWeight="SemiBold" />
                     <Grid ColumnSpacing="20" RowSpacing="10">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto" />
                             <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="Auto" />
-                            <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
                         <TextBlock Text="版本:" VerticalAlignment="Center" />
-                        <TextBlock Grid.Column="1" Text="{Binding FFmpegVersion.Version}" VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                        <TextBlock Grid.Column="2" Text="构建日期:" VerticalAlignment="Center" />
-                        <TextBlock Grid.Column="3" Text="{Binding FFmpegVersion.BuildDate}" VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                        <TextBlock Grid.Column="1" Text="{Binding FFmpegVersion.Version}" VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="NoWrap" />
                     </Grid>
                     <InfoBar IsOpen="{Binding FFmpegVersion.IsInstalled, Converter={StaticResource NegativeBoolConverter}}" Title="警告" Message="未检测到 FFmpeg · 到设置指定或安装FFmpeg" Severity="Warning" IsClosable="False" />
                 </StackPanel>
@@ -61,6 +57,7 @@
                                 <TextBlock Text="内存" FontWeight="SemiBold" />
                             </StackPanel>
                             <TextBlock Text="{Binding HardwareInfo.MemoryDisplay}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                            <TextBlock Text="(可用/全部)" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                         </StackPanel>
                     </Grid>
                 </StackPanel>
@@ -256,32 +253,7 @@
                                     </ItemsRepeater>
                                 </Expander>
                                 
-                                <!-- 其他视频编解码器 -->
-                                <Expander Header="其他视频编解码器" IsExpanded="False">
-                                    <ItemsRepeater ItemsSource="{Binding OtherVideoCodecs}">
-                                        <ItemsRepeater.Layout>
-                                            <StackLayout Spacing="12" Orientation="Horizontal" />
-                                        </ItemsRepeater.Layout>
-                                        <ItemsRepeater.ItemTemplate>
-                                            <DataTemplate>
-                                                <Border BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Padding="12" Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}" Width="280">
-                                                    <StackPanel Spacing="6">
-                                                        <TextBlock Text="{Binding Name}" FontWeight="SemiBold" FontSize="14" />
-                                                        <TextBlock Text="{Binding Description}" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
-                                                        <StackPanel Orientation="Horizontal" Spacing="4">
-                                                            <Border Background="{ThemeResource SystemFillColorSuccessBrush}" CornerRadius="4" Padding="6,2" Visibility="{Binding IsEncoder, Converter={StaticResource BoolToVisibilityConverter}}">
-                                                                <TextBlock Text="编码" FontSize="11" Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" />
-                                                            </Border>
-                                                            <Border Background="{ThemeResource SystemFillColorCautionBrush}" CornerRadius="4" Padding="6,2" Visibility="{Binding IsDecoder, Converter={StaticResource BoolToVisibilityConverter}}">
-                                                                <TextBlock Text="解码" FontSize="11" Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" />
-                                                            </Border>
-                                                        </StackPanel>
-                                                    </StackPanel>
-                                                </Border>
-                                            </DataTemplate>
-                                        </ItemsRepeater.ItemTemplate>
-                                    </ItemsRepeater>
-                                </Expander>
+
                             </StackPanel>
                         </StackPanel>
 
@@ -457,32 +429,7 @@
                                     </ItemsRepeater>
                                 </Expander>
                                 
-                                <!-- 其他音频编解码器 -->
-                                <Expander Header="其他音频编解码器" IsExpanded="False">
-                                    <ItemsRepeater ItemsSource="{Binding OtherAudioCodecs}">
-                                        <ItemsRepeater.Layout>
-                                            <StackLayout Spacing="12" Orientation="Horizontal" />
-                                        </ItemsRepeater.Layout>
-                                        <ItemsRepeater.ItemTemplate>
-                                            <DataTemplate>
-                                                <Border BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Padding="12" Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}" Width="280">
-                                                    <StackPanel Spacing="6">
-                                                        <TextBlock Text="{Binding Name}" FontWeight="SemiBold" FontSize="14" />
-                                                        <TextBlock Text="{Binding Description}" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
-                                                        <StackPanel Orientation="Horizontal" Spacing="4">
-                                                            <Border Background="{ThemeResource SystemFillColorSuccessBrush}" CornerRadius="4" Padding="6,2" Visibility="{Binding IsEncoder, Converter={StaticResource BoolToVisibilityConverter}}">
-                                                                <TextBlock Text="编码" FontSize="11" Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" />
-                                                            </Border>
-                                                            <Border Background="{ThemeResource SystemFillColorCautionBrush}" CornerRadius="4" Padding="6,2" Visibility="{Binding IsDecoder, Converter={StaticResource BoolToVisibilityConverter}}">
-                                                                <TextBlock Text="解码" FontSize="11" Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" />
-                                                            </Border>
-                                                        </StackPanel>
-                                                    </StackPanel>
-                                                </Border>
-                                            </DataTemplate>
-                                        </ItemsRepeater.ItemTemplate>
-                                    </ItemsRepeater>
-                                </Expander>
+
                             </StackPanel>
                         </StackPanel>
                     </StackPanel>

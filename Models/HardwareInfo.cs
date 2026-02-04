@@ -33,6 +33,7 @@ namespace FFmpegStudio.Models
         public string? Version { get; set; }
         public string? BuildDate { get; set; }
         public bool IsInstalled { get; set; }
+        public bool IsManualPath { get; set; }
     }
 
 }

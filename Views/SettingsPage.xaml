@@ -19,9 +19,11 @@
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
                         <TextBox PlaceholderText="选择 FFmpeg 可执行文件路径..." Text="{Binding FFmpegPath, Mode=TwoWay}" IsReadOnly="True" />
                         <Button Grid.Column="1" Content="浏览" CornerRadius="4" Command="{Binding BrowseFFmpegCommand}" />
+                        <Button Grid.Column="2" Content="重置" CornerRadius="4" Command="{Binding ResetFFmpegPathCommand}" />
                     </Grid>
                     <InfoBar IsOpen="{Binding IsFFmpegInstalled}" Title="状态" Message="{Binding FFmpegStatus}" Severity="Success" IsClosable="False" Margin="0,8,0,0" />
                     <InfoBar IsOpen="{Binding IsFFmpegInstalled, Converter={StaticResource NegativeBoolConverter}}" Title="警告" Message="FFmpeg 未检测到，请手动选择或通过 WinGet 安装" Severity="Warning" IsClosable="False" Margin="0,8,0,0" />
@@ -32,7 +34,14 @@
                 <StackPanel Spacing="12">
                     <TextBlock Text="安装 FFmpeg" FontSize="18" FontWeight="SemiBold" />
                     <TextBlock Text="推荐使用 WinGet 包管理器自动安装 FFmpeg" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                    <Button Content="通过 WinGet 安装 FFmpeg" Style="{ThemeResource AccentButtonStyle}" Command="{Binding InstallFFmpegWithWinGetCommand}" IsEnabled="{Binding IsInstallingFFmpeg, Converter={StaticResource NegativeBoolConverter}}" />
+                    <Grid ColumnSpacing="12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Button Grid.Column="0" Content="通过 WinGet 安装 FFmpeg" Style="{ThemeResource AccentButtonStyle}" Command="{Binding InstallFFmpegWithWinGetCommand}" IsEnabled="{Binding CanInstallFFmpeg}" />
+                        <TextBlock Grid.Column="1" Text="FFmpeg 已安装" Foreground="{ThemeResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" Visibility="{Binding IsFFmpegInstalled, Converter={StaticResource BoolToVisibilityConverter}}" />
+                    </Grid>
                     <ProgressBar IsIndeterminate="{Binding IsInstallingFFmpeg}" Visibility="{Binding IsInstallingFFmpeg, Converter={StaticResource BoolToVisibilityConverter}}" Margin="0,8,0,0" />
                     <TextBlock Text="{Binding InstallationStatus}" Visibility="{Binding ShowInstallationStatus, Converter={StaticResource BoolToVisibilityConverter}}" Margin="0,8,0,0" />
                 </StackPanel>
@@ -52,8 +61,24 @@
                 <StackPanel Spacing="12">
                     <TextBlock Text="关于" FontSize="18" FontWeight="SemiBold" />
                     <TextBlock Text="FFmpeg Studio" FontSize="16" FontWeight="SemiBold" />
-                    <TextBlock Text="版本 1.0.0" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                    <TextBlock Text="一个基于 FFmpeg 的多媒体处理工具" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                    <TextBlock Text="版本： " Foreground="{ThemeResource TextFillColorSecondaryBrush}">
+                        <Run Text="{Binding AboutInfo.Version}" />
+                    </TextBlock>
+                    <TextBlock Text="{Binding AboutInfo.Description}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                    <StackPanel Margin="0,8,0,0" Spacing="4">
+                        <TextBlock Text="更新内容:" FontSize="14" FontWeight="SemiBold" />
+                        <ItemsControl ItemsSource="{Binding AboutInfo.Changelog}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}">
+                                        <Run Text="- " />
+                                        <Run Text="{Binding}" />
+                                    </TextBlock>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                    <HyperlinkButton Content="项目链接" NavigateUri="{Binding AboutInfo.ProjectUrl}" Margin="0,8,0,0" />
                 </StackPanel>
             </Border>
         </StackPanel>

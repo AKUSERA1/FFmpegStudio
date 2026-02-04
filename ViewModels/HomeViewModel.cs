@@ -89,7 +89,7 @@ namespace FFmpegStudio.ViewModels
             {
                 FFmpegVersion = new FFmpegVersionInfo
                 {
-                    Version = "δ���",
+                    Version = "未安装",
                     BuildDate = "-",
                     IsInstalled = false
                 };
